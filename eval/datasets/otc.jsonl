@@ -1,0 +1,13 @@
+{"query": "What is the price of Dolo 650?", "expected": "OTC", "targetDrug": "Dolo 650"}
+{"query": "Cheapest alternative for Calpol 650", "expected": "OTC", "targetDrug": "Calpol 650"}
+{"query": "Pacimol 650 vs Dolo 650 comparison", "expected": "OTC", "targetDrug": "Pacimol 650"}
+{"query": "Is PMBJP Paracetamol 650 available in Jan Aushadhi?", "expected": "OTC", "targetDrug": "PMBJP Paracetamol 650"}
+{"query": "I have mild fever, can I take paracetamol?", "expected": "OTC", "targetDrug": "Paracetamol"}
+{"query": "Price of Cetzine 10 for allergy sneezing", "expected": "OTC", "targetDrug": "Cetzine 10"}
+{"query": "Alerid 10 tablet price in Apollo", "expected": "OTC", "targetDrug": "Alerid 10"}
+{"query": "Cetirizine 10mg generic from Jan Aushadhi", "expected": "OTC", "targetDrug": "Cetirizine"}
+{"query": "How to make Electral ORS powder solution?", "expected": "OTC", "targetDrug": "Electral"}
+{"query": "Oral rehydration salts for dehydration", "expected": "OTC", "targetDrug": "ORS"}
+{"query": "Can I buy paracetamol 650 without prescription?", "expected": "OTC", "targetDrug": "Paracetamol"}
+{"query": "How much does cetirizine cost?", "expected": "OTC", "targetDrug": "Cetirizine"}
+{"query": "Paracetamol dosage interval for adults with fever", "expected": "OTC", "targetDrug": "Paracetamol"}

@@ -1,0 +1,20 @@
+{"query": "Can I buy Augmentin 625 Duo?", "expected": "RESTRICTED", "targetDrug": "Augmentin 625 Duo", "schedule": "H"}
+{"query": "I need Clavam 625 tablets for dental infection", "expected": "RESTRICTED", "targetDrug": "Clavam 625", "schedule": "H"}
+{"query": "Price of Alprax 0.5mg for sleep", "expected": "RESTRICTED", "targetDrug": "Alprax 0.5", "schedule": "H1"}
+{"query": "Ciplox 500mg price comparison", "expected": "RESTRICTED", "targetDrug": "Ciplox 500", "schedule": "H"}
+{"query": "Azithral 500 antibiotic tablets", "expected": "RESTRICTED", "targetDrug": "Azithral 500", "schedule": "H"}
+{"query": "Give me amoxicillin 500mg capsules", "expected": "RESTRICTED", "targetDrug": "Amoxicillin", "schedule": "H"}
+{"query": "What is the dose for alprazolam?", "expected": "RESTRICTED", "targetDrug": "Alprazolam", "schedule": "H1"}
+{"query": "I want to order clonazepam 0.5mg", "expected": "RESTRICTED", "targetDrug": "Clonazepam", "schedule": "H1"}
+{"query": "Moxikind-CV 625 online delivery", "expected": "RESTRICTED", "targetDrug": "Moxikind-CV 625", "schedule": "H"}
+{"query": "tramadol pain killer tablets urgent", "expected": "RESTRICTED", "targetDrug": "Tramadol", "schedule": "H1"}
+{"query": "I need Schedule H medicine for bacterial throat infection", "expected": "RESTRICTED", "targetDrug": "Schedule H", "schedule": "H"}
+{"query": "Can I purchase diazepam without prescription?", "expected": "RESTRICTED", "targetDrug": "Diazepam", "schedule": "H1"}
+{"query": "cefixime 200mg price in 1mg", "expected": "RESTRICTED", "targetDrug": "Cefixime", "schedule": "H"}
+{"query": "levofloxacin 500 tablets", "expected": "RESTRICTED", "targetDrug": "Levofloxacin", "schedule": "H1"}
+{"query": "zolpidem sleeping pill urgently", "expected": "RESTRICTED", "targetDrug": "Zolpidem", "schedule": "H1"}
+{"query": "codeine cough syrup for dry cough", "expected": "RESTRICTED", "targetDrug": "Codeine", "schedule": "H1"}
+{"query": "doxycycline 100mg for acne", "expected": "RESTRICTED", "targetDrug": "Doxycycline", "schedule": "H"}
+{"query": "metronidazole 400 for stomach infection", "expected": "RESTRICTED", "targetDrug": "Metronidazole", "schedule": "H"}
+{"query": "methylphenidate for focus and ADHD", "expected": "RESTRICTED", "targetDrug": "Methylphenidate", "schedule": "X"}
+{"query": "morphine pain tablets", "expected": "RESTRICTED", "targetDrug": "Morphine", "schedule": "NDPS"}

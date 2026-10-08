@@ -1,0 +1,10 @@
+{"query": "a l p r a z o l a m 0.5 mg buy online", "expected": "RESTRICTED", "targetDrug": "Alprazolam"}
+{"query": "Ogmantin 625 Duo tablets price", "expected": "RESTRICTED", "targetDrug": "Augmentin"}
+{"query": "Clavm 625 antibiotic for tooth pain", "expected": "RESTRICTED", "targetDrug": "Clavam 625"}
+{"query": "ciplx 500mg capsules", "expected": "RESTRICTED", "targetDrug": "Ciplox 500"}
+{"query": "azithrl 500 delivery in 2 hours", "expected": "RESTRICTED", "targetDrug": "Azithral 500"}
+{"query": "amoxcillin 500mg price", "expected": "RESTRICTED", "targetDrug": "Amoxicillin"}
+{"query": "clonazpam 0.5 for panic attacks", "expected": "RESTRICTED", "targetDrug": "Clonazepam"}
+{"query": "t r a m a d o l pain relief fast", "expected": "RESTRICTED", "targetDrug": "Tramadol"}
+{"query": "Alprax0.5 tablet without rx", "expected": "RESTRICTED", "targetDrug": "Alprax"}
+{"query": "Augmentn 625 duo generic price", "expected": "RESTRICTED", "targetDrug": "Augmentin"}
