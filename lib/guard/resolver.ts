@@ -42,7 +42,8 @@ export function levenshteinDistance(a: string, b: string): number {
 /**
  * Normalized similarity score [0, 1] based on Levenshtein distance
  */
-export function fuzzySimilarity(s1: string, s2: string): number {
+export function fuzzySimilarity(s1?: string | null, s2?: string | null): number {
+  if (!s1 || !s2 || typeof s1 !== "string" || typeof s2 !== "string") return 0;
   const n1 = s1.toLowerCase().trim();
   const n2 = s2.toLowerCase().trim();
   if (n1 === n2) return 1.0;
@@ -55,7 +56,8 @@ export function fuzzySimilarity(s1: string, s2: string): number {
 /**
  * Phonetic Soundex implementation for sound-alike drug name matching
  */
-export function soundex(s: string): string {
+export function soundex(s?: string | null): string {
+  if (!s || typeof s !== "string") return "";
   const a = s.toLowerCase().replace(/[^a-z]/g, "");
   if (!a) return "";
   const first = a[0].toUpperCase();
@@ -87,7 +89,8 @@ export function soundex(s: string): string {
  * Normalize leetspeak and spaced-out letters (e.g. "a l p r a z o l a m", "0gmantin")
  * Preserves numerical dosages like 650, 500, 625, 0.5.
  */
-export function cleanSpacedAndLeet(text: string): string {
+export function cleanSpacedAndLeet(text?: string | null): string {
+  if (!text || typeof text !== "string") return "";
   let cleaned = text.trim();
 
   // Compress single-letter spaces: "a l p r a z o l a m" -> "alprazolam", "t r a m a d o l" -> "tramadol"
@@ -166,9 +169,10 @@ async function getCatalogMeds(): Promise<InternalMedRecord[]> {
  * Hybrid Resolver: Combines Exact, Brand-Prefix, Fuzzy, and Phonetic matches
  */
 export async function resolveMedicineCandidates(
-  mention: string,
+  mention?: string | null,
   topK = 5
 ): Promise<ResolvedCandidate[]> {
+  if (!mention || typeof mention !== "string") return [];
   const cleaned = cleanSpacedAndLeet(mention).toLowerCase().trim();
   if (!cleaned || cleaned.length < 3) return [];
 
@@ -177,12 +181,15 @@ export async function resolveMedicineCandidates(
   const allMeds = await getCatalogMeds();
 
   for (const med of allMeds) {
-    const medName = med.name.toLowerCase();
-    const brandLower = med.brandName.toLowerCase();
-    const normName = med.nameNormalized;
+    const medName = (med.name || "").toLowerCase();
+    const brandLower = (med.brandName || "").toLowerCase();
+    const normName = (med.nameNormalized || "").toLowerCase();
+    const medSalts = Array.isArray(med.salts)
+      ? med.salts.filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+      : [];
 
     // 1. Exact match on brand name or salts
-    const saltMatch = med.salts.some((s) => {
+    const saltMatch = medSalts.some((s) => {
       const sLower = s.toLowerCase();
       return (
         sLower === cleaned ||
@@ -192,16 +199,16 @@ export async function resolveMedicineCandidates(
     });
 
     const brandExact =
-      medName === cleaned ||
-      normName === cleaned ||
-      brandLower === cleaned;
+      Boolean(medName && medName === cleaned) ||
+      Boolean(normName && normName === cleaned) ||
+      Boolean(brandLower && brandLower === cleaned);
 
     const brandPrefix =
       cleaned.length >= 4 &&
-      (medName.startsWith(cleaned) ||
-        normName.startsWith(cleaned) ||
-        brandLower.startsWith(cleaned) ||
-        cleaned.startsWith(brandLower));
+      ((medName && medName.startsWith(cleaned)) ||
+        (normName && normName.startsWith(cleaned)) ||
+        (brandLower && brandLower.startsWith(cleaned)) ||
+        (brandLower && cleaned.startsWith(brandLower)));
 
     if (saltMatch || brandExact || brandPrefix) {
       candidates.push({
@@ -217,18 +224,19 @@ export async function resolveMedicineCandidates(
     }
 
     // 2. Fuzzy match
+    const saltFuzzyScores = medSalts.map((s) => fuzzySimilarity(cleaned, s));
     const fScore = Math.max(
       fuzzySimilarity(cleaned, medName),
       fuzzySimilarity(cleaned, normName),
       fuzzySimilarity(cleaned, brandLower),
-      ...med.salts.map((s) => fuzzySimilarity(cleaned, s))
+      ...(saltFuzzyScores.length > 0 ? saltFuzzyScores : [0])
     );
 
     // 3. Phonetic match
     const pScore =
-      soundex(medName) === mentionSound ||
-      soundex(normName) === mentionSound ||
-      soundex(brandLower) === mentionSound
+      (medName && soundex(medName) === mentionSound) ||
+      (normName && soundex(normName) === mentionSound) ||
+      (brandLower && soundex(brandLower) === mentionSound)
         ? 0.85
         : 0.0;
 

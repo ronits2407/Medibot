@@ -8,7 +8,7 @@ import {
 } from "./saltCheck";
 import { runRegexNet } from "./regexNet";
 import { classifySafetyWithLLM, confirmRestrictionWithLLM } from "./classifier";
-import { extractMentions } from "./extractor";
+import { extractMentions, ExtractedMention } from "./extractor";
 import { resolveMedicineCandidates, ResolvedCandidate, cleanSpacedAndLeet } from "./resolver";
 import { MEDICINE_CATALOG } from "@/lib/data/catalog";
 
@@ -173,7 +173,11 @@ export async function guard(
   }
 
   // --- Layer 4: Candidate Extraction ---
-  const mentions = await extractMentions(textToScan, sessionMemory);
+  const rawMentions = await extractMentions(textToScan, sessionMemory);
+  const mentions = (rawMentions || []).filter(
+    (m): m is ExtractedMention =>
+      Boolean(m && typeof m.mention === "string" && m.mention.trim().length > 0)
+  );
 
   // If no mentions found, run LLM Classifier Net for indirect phrasing ("sleeping pills", etc.)
   if (mentions.length === 0) {
@@ -192,6 +196,7 @@ export async function guard(
   const resolvedCandidates: ResolvedCandidate[] = [];
 
   for (const m of mentions) {
+    if (!m?.mention) continue;
     // Direct check if mention is itself a restricted salt
     const saltResult = await checkSaltRestriction([m.mention]);
     if (saltResult.restricted) {
@@ -216,7 +221,9 @@ export async function guard(
 
   if (resolvedCandidates.length === 0) {
     // Check if the query or mention is a known OTC salt (Paracetamol, Cetirizine, ORS, etc.)
-    const isOtc = mentions.some((m) => isKnownOtcSalt(m.mention)) || isKnownOtcSalt(textToScan);
+    const isOtc =
+      mentions.some((m) => m?.mention && isKnownOtcSalt(m.mention)) ||
+      isKnownOtcSalt(textToScan);
     if (isOtc) {
       result.verdict = "OTC";
       return result;

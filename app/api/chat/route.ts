@@ -58,7 +58,18 @@ export async function POST(req: NextRequest) {
           });
         }
         effectiveChatId = chatDoc._id.toString();
-        sessionMemory = chatDoc.entityMemory || sessionMemory;
+        const rawEntityMem = chatDoc.entityMemory as any;
+        const dbMemory = rawEntityMem?.toObject ? rawEntityMem.toObject() : rawEntityMem;
+        if (dbMemory) {
+          sessionMemory = {
+            ...sessionMemory,
+            ...dbMemory,
+            currentMedicine:
+              dbMemory.currentMedicine?.name
+                ? dbMemory.currentMedicine
+                : sessionMemory.currentMedicine,
+          };
+        }
       } catch {}
     }
 
@@ -111,7 +122,36 @@ export async function POST(req: NextRequest) {
           id: drugLookupData.id,
           name: drugLookupData.name,
         };
-        inMemoryMemory.set(effectiveChatId, sessionMemory);
+        if (alternativesData?.alternatives?.length) {
+          sessionMemory.lastAlternatives = alternativesData.alternatives.map((a: any) => ({
+            id: a.id,
+            name: a.name,
+          }));
+        }
+      } else if (topEntity.name || topEntity.mention) {
+        sessionMemory.currentMedicine = {
+          id: topEntity.medicineId || `med_${Date.now()}`,
+          name: topEntity.name || topEntity.mention,
+        };
+      }
+
+      if (sessionMemory.currentMedicine?.name) {
+        if (!sessionMemory.mentionedMedicines) sessionMemory.mentionedMedicines = [];
+        if (!sessionMemory.mentionedMedicines.some((m: any) => m.name === sessionMemory.currentMedicine.name)) {
+          sessionMemory.mentionedMedicines.push({
+            id: sessionMemory.currentMedicine.id,
+            name: sessionMemory.currentMedicine.name,
+          });
+        }
+      }
+
+      inMemoryMemory.set(effectiveChatId, sessionMemory);
+      if (isDbOnline && effectiveChatId) {
+        try {
+          await Chat.findByIdAndUpdate(effectiveChatId, {
+            $set: { entityMemory: sessionMemory },
+          });
+        } catch {}
       }
     }
 

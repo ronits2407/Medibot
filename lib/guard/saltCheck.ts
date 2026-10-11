@@ -2,7 +2,11 @@ import { RestrictedSalt } from "@/lib/db/models/RestrictedSalt";
 import { connectToDatabase } from "@/lib/db/client";
 
 // Normalize salt name for lookup (lowercase, normalize common spelling differences)
-export function normalizeSaltName(salt: string): string {
+export function normalizeSaltName(salt?: string | null): string {
+  if (!salt || typeof salt !== "string") {
+    return "";
+  }
+
   let normalized = salt
     .toLowerCase()
     .trim()
@@ -110,7 +114,8 @@ export const OTC_SALTS_ALLOWLIST = new Set([
   "calcium carbonate",
 ]);
 
-export function isKnownOtcSalt(salt: string): boolean {
+export function isKnownOtcSalt(salt?: string | null): boolean {
+  if (!salt || typeof salt !== "string") return false;
   const norm = normalizeSaltName(salt);
   if (norm.length < 3) return false;
   for (const otc of Array.from(OTC_SALTS_ALLOWLIST)) {
@@ -132,13 +137,20 @@ export interface SaltCheckResult {
  * Deterministic Salt Checker
  * Final authority on whether any salt in the composition is prescription-restricted.
  */
-export async function checkSaltRestriction(salts: string[]): Promise<SaltCheckResult> {
-  if (!salts || salts.length === 0) {
+export async function checkSaltRestriction(
+  salts?: (string | undefined | null)[]
+): Promise<SaltCheckResult> {
+  if (!salts || !Array.isArray(salts) || salts.length === 0) {
+    return { restricted: false, source: "none" };
+  }
+
+  const validSalts = salts.filter((s): s is string => typeof s === "string" && s.trim().length > 0);
+  if (validSalts.length === 0) {
     return { restricted: false, source: "none" };
   }
 
   // 1. Check in-memory fast authority
-  for (const rawSalt of salts) {
+  for (const rawSalt of validSalts) {
     const norm = normalizeSaltName(rawSalt);
     if (norm.length < 3) continue;
 
@@ -162,7 +174,7 @@ export async function checkSaltRestriction(salts: string[]): Promise<SaltCheckRe
   // 2. Check Database collection `salts_restricted`
   try {
     await connectToDatabase();
-    for (const rawSalt of salts) {
+    for (const rawSalt of validSalts) {
       const norm = normalizeSaltName(rawSalt);
       if (norm.length < 3) continue;
 

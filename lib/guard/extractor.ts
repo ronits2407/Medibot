@@ -31,33 +31,60 @@ export async function extractMentions(
 
   // 1. Resolve conversational memory references
   if (sessionMemory) {
-    if (lower.includes("first") && sessionMemory.lastAlternatives?.[0]) {
-      mentions.push({
-        mention: sessionMemory.lastAlternatives[0].name,
-        type: "DRUG",
-        confidence: 0.95,
-      });
-    } else if (lower.includes("second") && sessionMemory.lastAlternatives?.[1]) {
-      mentions.push({
-        mention: sessionMemory.lastAlternatives[1].name,
-        type: "DRUG",
-        confidence: 0.95,
-      });
-    } else if (lower.includes("third") && sessionMemory.lastAlternatives?.[2]) {
-      mentions.push({
-        mention: sessionMemory.lastAlternatives[2].name,
-        type: "DRUG",
-        confidence: 0.95,
-      });
-    } else if (
-      (lower.includes("that") || lower.includes("this") || lower.includes("it")) &&
-      sessionMemory.currentMedicine
-    ) {
-      mentions.push({
-        mention: sessionMemory.currentMedicine.name,
-        type: "DRUG",
-        confidence: 0.9,
-      });
+    if (/\b(first|1st|option 1|number 1)\b/i.test(lower) && sessionMemory.lastAlternatives?.[0]?.name) {
+      const name = sessionMemory.lastAlternatives[0].name.trim();
+      if (name) {
+        mentions.push({
+          mention: name,
+          type: "DRUG",
+          confidence: 0.95,
+        });
+      }
+    } else if (/\b(second|2nd|option 2|number 2)\b/i.test(lower) && sessionMemory.lastAlternatives?.[1]?.name) {
+      const name = sessionMemory.lastAlternatives[1].name.trim();
+      if (name) {
+        mentions.push({
+          mention: name,
+          type: "DRUG",
+          confidence: 0.95,
+        });
+      }
+    } else if (/\b(third|3rd|option 3|number 3)\b/i.test(lower) && sessionMemory.lastAlternatives?.[2]?.name) {
+      const name = sessionMemory.lastAlternatives[2].name.trim();
+      if (name) {
+        mentions.push({
+          mention: name,
+          type: "DRUG",
+          confidence: 0.95,
+        });
+      }
+    } else if (/\b(that|this|it|its|the medicine|the drug|this medicine|this drug|that medicine|that drug)\b/i.test(lower)) {
+      let resolvedName: string | undefined = undefined;
+
+      const currMed = sessionMemory.currentMedicine as any;
+      if (currMed) {
+        if (typeof currMed === "string" && currMed.trim()) {
+          resolvedName = currMed.trim();
+        } else if (typeof currMed.name === "string" && currMed.name.trim()) {
+          resolvedName = currMed.name.trim();
+        }
+      }
+
+      // Fallback to latest mentioned medicine if currentMedicine is missing or incomplete
+      if (!resolvedName && Array.isArray(sessionMemory.mentionedMedicines) && sessionMemory.mentionedMedicines.length > 0) {
+        const lastMed = sessionMemory.mentionedMedicines[sessionMemory.mentionedMedicines.length - 1];
+        if (typeof lastMed?.name === "string" && lastMed.name.trim()) {
+          resolvedName = lastMed.name.trim();
+        }
+      }
+
+      if (resolvedName) {
+        mentions.push({
+          mention: resolvedName,
+          type: "DRUG",
+          confidence: 0.9,
+        });
+      }
     }
   }
 
@@ -155,5 +182,7 @@ If no specific medicine or salt is mentioned, return { "mentions": [] }.`;
     // Graceful fallback
   }
 
-  return mentions;
+  return mentions.filter(
+    (m) => Boolean(m && typeof m.mention === "string" && m.mention.trim().length > 0)
+  );
 }
