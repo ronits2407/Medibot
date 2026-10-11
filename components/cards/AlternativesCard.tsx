@@ -36,6 +36,8 @@ interface AlternativesCardProps {
 export function AlternativesCard({ data }: AlternativesCardProps) {
   if (!data || !data.alternatives || data.alternatives.length === 0) return null;
 
+  const sourceMrp = data?.sourceMedicine?.mrp ?? (data as any)?.originalPrice ?? 0;
+
   return (
     <div className="w-full my-4 rounded-[1.5rem] border-2 border-ink bg-sand p-5 shadow-brutal">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2 border-b-2 border-ink pb-3">
@@ -53,43 +55,47 @@ export function AlternativesCard({ data }: AlternativesCardProps) {
           </div>
         </div>
 
-        <span className="text-xs font-bold text-muted-foreground bg-cream px-3 py-1 rounded-full border border-ink/30">
-          Source MRP: <strong className="font-mono text-ink">₹{data.sourceMedicine.mrp.toFixed(2)}</strong>
-        </span>
+        {sourceMrp > 0 && (
+          <span className="text-xs font-bold text-muted-foreground bg-cream px-3 py-1 rounded-full border border-ink/30">
+            Source MRP: <strong className="font-mono text-ink">₹{Number(sourceMrp).toFixed(2)}</strong>
+          </span>
+        )}
       </div>
 
       <div className="space-y-3">
-        {data.alternatives.map((alt) => (
-          <div
-            key={alt.id}
-            className="p-4 rounded-xl border-2 border-ink bg-cream shadow-brutal-sm"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-ink/15 pb-2.5">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h5 className="font-heading text-base font-extrabold text-ink">{alt.name}</h5>
-                  {alt.isGenericJanAushadhi && (
-                    <span className="rounded-full bg-olive px-2.5 py-0.5 text-[10px] font-black uppercase text-ink border border-ink">
-                      Jan Aushadhi
-                    </span>
-                  )}
+        {data.alternatives.map((alt, idx) => {
+          const itemMrp = alt.mrp ?? (alt as any).price ?? 0;
+          return (
+            <div
+              key={alt.id || alt.name || idx}
+              className="p-4 rounded-xl border-2 border-ink bg-cream shadow-brutal-sm"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-ink/15 pb-2.5">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h5 className="font-heading text-base font-extrabold text-ink">{alt.name}</h5>
+                    {alt.isGenericJanAushadhi && (
+                      <span className="rounded-full bg-olive px-2.5 py-0.5 text-[10px] font-black uppercase text-ink border border-ink">
+                        Jan Aushadhi
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 font-medium">
+                    <Building2 className="h-3 w-3" /> {alt.manufacturer}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 font-medium">
-                  <Building2 className="h-3 w-3" /> {alt.manufacturer}
-                </span>
-              </div>
 
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">MRP</span>
-                  <span className="font-mono text-base font-black text-ink">₹{alt.mrp.toFixed(2)}</span>
-                </div>
-                <div className="rounded-xl border border-ink bg-sun px-3 py-1 text-center">
-                  <span className="text-[10px] font-bold block uppercase text-ink">Save</span>
-                  <span className="font-mono text-sm font-black text-ink">{alt.savingsPct}%</span>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">MRP</span>
+                    <span className="font-mono text-base font-black text-ink">₹{Number(itemMrp).toFixed(2)}</span>
+                  </div>
+                  <div className="rounded-xl border border-ink bg-sun px-3 py-1 text-center">
+                    <span className="text-[10px] font-bold block uppercase text-ink">Save</span>
+                    <span className="font-mono text-sm font-black text-ink">{alt.savingsPct}%</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
             {/* Partner Quotes if available */}
             {alt.partnerPriceComparison && alt.partnerPriceComparison.length > 0 && (
@@ -108,7 +114,7 @@ export function AlternativesCard({ data }: AlternativesCardProps) {
               </div>
             )}
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Required Advisory */}

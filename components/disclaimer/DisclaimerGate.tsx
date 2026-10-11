@@ -11,6 +11,7 @@ import {
   Navigation,
   Loader2,
   ArrowRight,
+  X,
 } from "lucide-react";
 
 interface DisclaimerGateProps {
@@ -32,8 +33,12 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
   const [gpsError, setGpsError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If inside presentation deck or preview routes, do not block view
-    if (pathname?.startsWith("/deck")) {
+    // If inside landing page, presentation deck, or login, never auto-popup
+    if (
+      pathname === "/" ||
+      pathname?.startsWith("/deck") ||
+      pathname?.startsWith("/login")
+    ) {
       setCheckedInitial(true);
       return;
     }
@@ -43,22 +48,26 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
         const res = await fetch("/api/disclaimer");
         if (res.ok) {
           const data = await res.json();
-          if (!data.acknowledged) {
-            localStorage.removeItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`);
-            setStep("disclaimer");
-            setIsOpen(true);
+          // Only show automatically after user login
+          if (!data.authenticated) {
+            setIsOpen(false);
             setCheckedInitial(true);
             return;
-          } else {
-            localStorage.setItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`, "true");
           }
-        }
 
-        const pincodePermitted =
-          localStorage.getItem("medibot_pincode_permitted") === "true";
-        if (!pincodePermitted) {
-          setStep("location");
-          setIsOpen(true);
+          const localAck =
+            typeof window !== "undefined" &&
+            localStorage.getItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`) === "true";
+
+          if (!data.acknowledged && !localAck) {
+            setStep("disclaimer");
+            setIsOpen(true);
+          } else {
+            if (data.acknowledged) {
+              localStorage.setItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`, "true");
+            }
+            setIsOpen(false);
+          }
         }
       } catch (e) {
         console.error("Could not fetch status:", e);
@@ -83,6 +92,16 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const handleAcceptDisclaimer = async () => {
     if (!isChecked || loading) return;
     setLoading(true);
@@ -93,11 +112,13 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
         body: JSON.stringify({ version: DISCLAIMER_VERSION }),
       });
       localStorage.setItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`, "true");
-      setStep("location");
+      setIsOpen(false);
+      onAcknowledged?.();
     } catch (e) {
       console.error("Failed to submit acknowledgement:", e);
       localStorage.setItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`, "true");
-      setStep("location");
+      setIsOpen(false);
+      onAcknowledged?.();
     } finally {
       setLoading(false);
     }
@@ -199,16 +220,39 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
     }
   };
 
-  if (!checkedInitial || !isOpen || pathname?.startsWith("/deck")) {
+  if (
+    !checkedInitial ||
+    !isOpen ||
+    pathname === "/" ||
+    pathname?.startsWith("/deck") ||
+    pathname?.startsWith("/login")
+  ) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/65 backdrop-blur-md p-4 animate-in fade-in duration-200">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          setIsOpen(false);
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/65 backdrop-blur-md p-4 animate-in fade-in duration-200"
+    >
       {/* STEP 1: Medical Disclaimer */}
       {step === "disclaimer" ? (
-        <div className="w-full max-w-lg rounded-[2.5rem] border-[3px] border-ink bg-[#fbf8ef] p-6 sm:p-8 shadow-[10px_10px_0_0_#17140f] text-ink animate-in zoom-in-95 duration-200 space-y-6">
-          <div className="flex items-center gap-4">
+        <div className="relative w-full max-w-lg rounded-[2.5rem] border-[3px] border-ink bg-[#fbf8ef] p-6 sm:p-8 shadow-[10px_10px_0_0_#17140f] text-ink animate-in zoom-in-95 duration-200 space-y-6">
+          {/* Close / Dismiss button */}
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close disclaimer modal"
+            className="absolute top-5 right-5 h-9 w-9 rounded-full border-2 border-ink bg-sand/60 hover:bg-blush flex items-center justify-center text-ink transition-colors shadow-xs cursor-pointer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          <div className="flex items-center gap-4 pr-10">
             <div className="h-12 w-12 rounded-2xl border-2 border-ink bg-sun flex items-center justify-center text-ink shrink-0 shadow-[3px_3px_0_0_#17140f]">
               <ShieldAlert className="h-7 w-7 text-ink" />
             </div>
@@ -270,8 +314,18 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
         </div>
       ) : (
         /* STEP 2: Delivery PIN Code Selection */
-        <div className="w-full max-w-md rounded-[2.5rem] border-[3px] border-ink bg-[#fbf8ef] p-6 sm:p-8 shadow-[10px_10px_0_0_#17140f] text-ink animate-in zoom-in-95 duration-150 space-y-6">
-          <div className="flex items-center gap-4">
+        <div className="relative w-full max-w-md rounded-[2.5rem] border-[3px] border-ink bg-[#fbf8ef] p-6 sm:p-8 shadow-[10px_10px_0_0_#17140f] text-ink animate-in zoom-in-95 duration-150 space-y-6">
+          {/* Close / Dismiss button */}
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close location dialog"
+            className="absolute top-5 right-5 h-9 w-9 rounded-full border-2 border-ink bg-sand/60 hover:bg-blush flex items-center justify-center text-ink transition-colors shadow-xs cursor-pointer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          <div className="flex items-center gap-4 pr-10">
             <div className="h-12 w-12 rounded-2xl border-2 border-ink bg-sky flex items-center justify-center text-ink shrink-0 shadow-[3px_3px_0_0_#17140f]">
               <MapPin className="h-6 w-6 text-ink" />
             </div>
@@ -325,14 +379,28 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleSaveLocation}
-            disabled={loading || !/^[1-9][0-9]{5}$/.test(pincode)}
-            className="w-full py-4 px-6 rounded-full border-[3px] border-ink font-heading font-extrabold text-sm uppercase tracking-wider bg-sun hover:bg-sun-deep text-ink shadow-[4px_4px_0_0_#17140f] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {loading ? "Saving..." : "Set Delivery PIN"}
-          </button>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem("medibot_delivery_pincode", "110001");
+                localStorage.setItem("medibot_pincode_permitted", "true");
+                setIsOpen(false);
+                onAcknowledged?.();
+              }}
+              className="py-3.5 px-4 rounded-full border-2 border-ink bg-sand hover:bg-sand/80 text-ink text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+            >
+              Skip
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveLocation}
+              disabled={loading || !/^[1-9][0-9]{5}$/.test(pincode)}
+              className="flex-1 py-3.5 px-6 rounded-full border-[3px] border-ink font-heading font-extrabold text-xs uppercase tracking-wider bg-sun hover:bg-sun-deep text-ink shadow-[3px_3px_0_0_#17140f] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed text-center"
+            >
+              {loading ? "Saving..." : "Set Delivery PIN"}
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -67,7 +67,11 @@ export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ acknowledged: false, version: DISCLAIMER_VERSION });
+      return NextResponse.json({
+        authenticated: false,
+        acknowledged: false,
+        version: DISCLAIMER_VERSION,
+      });
     }
 
     await connectToDatabase();
@@ -77,6 +81,7 @@ export async function GET() {
       !!user?.disclaimerAckAt && user.disclaimerVersion === DISCLAIMER_VERSION;
 
     return NextResponse.json({
+      authenticated: true,
       acknowledged,
       version: user?.disclaimerVersion || DISCLAIMER_VERSION,
       ackAt: user?.disclaimerAckAt || null,
