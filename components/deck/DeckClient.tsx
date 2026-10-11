@@ -105,18 +105,23 @@ export function DeckClient({ receiptId }: { receiptId?: string | null }) {
         }}
         className="relative shrink-0 shadow-2xl"
       >
-        {slides.map((s, idx) => (
-          <div
-            key={idx}
-            className="absolute inset-0"
-            style={{
-              visibility: idx === i ? 'visible' : 'hidden',
-              pointerEvents: idx === i ? 'auto' : 'none',
-            }}
-          >
-            {s({ receiptId })}
-          </div>
-        ))}
+        {slides.map((s, idx) => {
+          const isActive = idx === i
+          return (
+            <div
+              key={idx}
+              className={`absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isActive
+                  ? 'opacity-100 scale-100 translate-x-0 pointer-events-auto z-10'
+                  : idx < i
+                  ? 'opacity-0 scale-[0.98] -translate-x-10 pointer-events-none z-0'
+                  : 'opacity-0 scale-[0.98] translate-x-10 pointer-events-none z-0'
+              }`}
+            >
+              {s({ receiptId })}
+            </div>
+          )
+        })}
       </div>
 
       {/* Floating Pill Controller */}

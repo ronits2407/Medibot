@@ -56,6 +56,56 @@
 }
 .animate-marquee { animation: marquee 32s linear infinite; }
 
+/* Presentation Deck Animation Suite */
+@keyframes deck-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes deck-kicker {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.deck-box {
+  animation: deck-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.deck-box:nth-child(1) { animation-delay: 0.08s; }
+.deck-box:nth-child(2) { animation-delay: 0.16s; }
+.deck-box:nth-child(3) { animation-delay: 0.24s; }
+.deck-box:nth-child(4) { animation-delay: 0.32s; }
+.deck-box:nth-child(5) { animation-delay: 0.40s; }
+
+.deck-chip {
+  animation: deck-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.deck-chip:nth-child(1) { animation-delay: 0.1s; }
+.deck-chip:nth-child(2) { animation-delay: 0.18s; }
+.deck-chip:nth-child(3) { animation-delay: 0.26s; }
+.deck-chip:nth-child(4) { animation-delay: 0.34s; }
+
+.deck-kicker {
+  animation: deck-kicker 0.4s ease-out both;
+}
+
+.deck-title {
+  animation: deck-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.05s;
+}
+
 /* Custom scrollbars - Hide scrollbars everywhere while preserving smooth scrolling */
 html,
 body,
