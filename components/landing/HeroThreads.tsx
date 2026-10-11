@@ -3,17 +3,23 @@
 import React, { useMemo } from 'react'
 import styles from './HeroThreads.module.css'
 
-const THREADS = Array.from({ length: 36 }, (_, index) => ({
-  index: index % 18,
-  side: index < 18 ? 'left' : 'right',
-  color: ['#7f9145', '#cf85b0', '#8c9fdb'][Math.floor(index / 6) % 3],
-}))
+// 8 lightweight, elegant accent curves (4 left, 4 right)
+const THREADS = [
+  { index: 0, side: 'left', color: '#7f9145' },
+  { index: 1, side: 'left', color: '#cf85b0' },
+  { index: 2, side: 'left', color: '#8c9fdb' },
+  { index: 3, side: 'left', color: '#e6bd35' },
+  { index: 0, side: 'right', color: '#7f9145' },
+  { index: 1, side: 'right', color: '#cf85b0' },
+  { index: 2, side: 'right', color: '#8c9fdb' },
+  { index: 3, side: 'right', color: '#e6bd35' },
+]
 
 function threadPath(index: number, side: string) {
-  const gap = index * 13
+  const gap = index * 42
   return side === 'left'
-    ? `M ${-280 + gap} -80 C ${620 + gap} 90, ${-470 + gap} 290, ${60 + gap} 510 S ${640 + gap} 740, ${320 + gap} 980`
-    : `M ${1520 - gap} -80 C ${780 - gap} 150, ${1930 - gap} 320, ${1330 - gap} 530 S ${850 - gap} 760, ${1270 - gap} 980`
+    ? `M ${-240 + gap} -80 C ${640 + gap} 110, ${-420 + gap} 300, ${80 + gap} 520 S ${660 + gap} 730, ${340 + gap} 960`
+    : `M ${1480 - gap} -80 C ${760 - gap} 160, ${1880 - gap} 330, ${1310 - gap} 540 S ${830 - gap} 750, ${1250 - gap} 960`
 }
 
 export default function HeroThreads() {
@@ -23,26 +29,26 @@ export default function HeroThreads() {
   return (
     <div className={styles.threads} aria-hidden="true">
       <svg viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none" focusable="false">
-        <g className={styles.left}>
+        <g>
           {leftThreads.map((thread) => (
             <path
               key={`l-${thread.index}`}
               d={threadPath(thread.index, 'left')}
               stroke={thread.color}
-              strokeWidth={thread.index % 6 === 0 ? 1.5 : 0.8}
-              strokeOpacity={thread.index % 6 === 0 ? 0.55 : 0.32}
+              strokeWidth="1.5"
+              strokeOpacity="0.35"
               vectorEffect="non-scaling-stroke"
             />
           ))}
         </g>
-        <g className={styles.right}>
+        <g>
           {rightThreads.map((thread) => (
             <path
               key={`r-${thread.index}`}
               d={threadPath(thread.index, 'right')}
               stroke={thread.color}
-              strokeWidth={thread.index % 6 === 0 ? 1.5 : 0.8}
-              strokeOpacity={thread.index % 6 === 0 ? 0.55 : 0.32}
+              strokeWidth="1.5"
+              strokeOpacity="0.35"
               vectorEffect="non-scaling-stroke"
             />
           ))}

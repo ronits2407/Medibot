@@ -72,7 +72,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-blush selection:text-ink">
       {/* Top Floating Nav */}
       <header className="sticky top-0 z-40 px-4 pt-4">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border-2 border-ink bg-[#fbf8ef]/90 px-4 py-2.5 backdrop-blur-xl shadow-brutal-sm">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border-2 border-ink bg-[#fbf8ef] px-4 py-2.5 shadow-brutal-sm">
           <Link href="/" className="font-heading text-xl font-black tracking-tight text-ink">
             Medi<span className="text-destructive">Bot</span>
             <span className="text-blush font-black">.</span>
