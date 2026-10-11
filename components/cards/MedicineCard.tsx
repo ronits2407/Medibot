@@ -57,7 +57,7 @@ export function MedicineCard({ data }: MedicineCardProps) {
         <div className="text-right">
           <span className="text-[10px] uppercase font-bold text-muted-foreground block">MRP</span>
           <span className="font-mono text-2xl font-black text-ink">
-            ₹{data.mrp.toFixed(2)}
+            ₹{typeof data?.mrp === "number" ? data.mrp.toFixed(2) : "0.00"}
           </span>
           <span className="text-[10px] text-muted-foreground block font-medium">{data.packSize}</span>
         </div>

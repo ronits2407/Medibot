@@ -111,8 +111,8 @@ export function PriceTable({ data }: PriceTableProps) {
               <div className="flex items-center justify-between sm:justify-end gap-4">
                 <div className="text-right">
                   <div className="flex items-center gap-1.5 justify-end">
-                    <span className="font-mono text-base font-black text-ink">₹{item.price.toFixed(2)}</span>
-                    {item.mrp > item.price && (
+                    <span className="font-mono text-base font-black text-ink">₹{Number(item.price || 0).toFixed(2)}</span>
+                    {typeof item.mrp === "number" && typeof item.price === "number" && item.mrp > item.price && (
                       <span className="font-mono text-xs text-muted-foreground line-through">
                         ₹{item.mrp.toFixed(2)}
                       </span>

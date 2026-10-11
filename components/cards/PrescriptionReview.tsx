@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileCheck, ShieldCheck, Check, Trash2, ArrowRight, Sparkles } from "lucide-react";
+import { FileCheck, Sparkles, X } from "lucide-react";
 
 export interface PrescriptionItem {
   rawText: string;
@@ -47,22 +47,22 @@ export function PrescriptionReview({ items, onConfirm, onCancel }: PrescriptionR
   };
 
   return (
-    <div className="rounded-3xl bg-white dark:bg-slate-900 border border-teal-200 dark:border-teal-800/60 p-6 shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="h-10 w-10 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-            <FileCheck className="h-6 w-6" />
+    <div className="rounded-3xl bg-[#fbf8ef] border-3 border-ink p-6 shadow-[8px_8px_0_0_#17140f] space-y-5 text-ink animate-in fade-in zoom-in-95 duration-200">
+      <div className="flex items-center justify-between pb-3 border-b-2 border-ink">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-sun border-2 border-ink text-ink flex items-center justify-center shadow-xs">
+            <FileCheck className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+            <h3 className="text-base font-heading font-black text-ink">
               Prescription Extracted Review
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-ink/70 font-medium">
               Review and confirm identified medications before querying pricing & safety guards.
             </p>
           </div>
         </div>
-        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300">
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-sand border border-ink text-ink">
           {items.length} items found
         </span>
       </div>
@@ -74,17 +74,17 @@ export function PrescriptionReview({ items, onConfirm, onCancel }: PrescriptionR
           return (
             <div
               key={idx}
-              className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3.5 ${
+              className={`p-3.5 rounded-2xl border-2 transition-all flex items-center gap-3.5 ${
                 isChecked
-                  ? "bg-slate-50 dark:bg-slate-850 border-teal-300 dark:border-teal-800"
-                  : "bg-slate-100/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-60"
+                  ? "bg-cream border-ink shadow-xs"
+                  : "bg-sand/30 border-ink/40 opacity-60"
               }`}
             >
               <input
                 type="checkbox"
                 checked={isChecked}
                 onChange={() => toggleSelect(idx)}
-                className="h-4 w-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
+                className="h-4 w-4 rounded accent-ink border-2 border-ink cursor-pointer"
               />
 
               <div className="flex-1 space-y-1">
@@ -93,21 +93,21 @@ export function PrescriptionReview({ items, onConfirm, onCancel }: PrescriptionR
                     type="text"
                     value={editableNames[idx] ?? item.drugName}
                     onChange={(e) => handleNameChange(idx, e.target.value)}
-                    className="font-bold text-xs text-slate-900 dark:text-white bg-transparent border-b border-slate-300 dark:border-slate-600 focus:outline-hidden focus:border-teal-500 py-0.5 px-1 w-full max-w-xs"
+                    className="font-heading font-black text-xs text-ink bg-transparent border-b-2 border-ink focus:outline-none py-0.5 px-1 w-full max-w-xs"
                   />
                   {item.strength && (
-                    <span className="text-[11px] font-semibold text-slate-500">
+                    <span className="text-[11px] font-mono font-bold text-ink/80">
                       {item.strength}
                     </span>
                   )}
                   {item.form && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-sand border border-ink font-mono font-bold text-ink">
                       {item.form}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                <div className="flex items-center gap-2 text-[10px] text-ink/60 font-mono">
                   <span>Snippet: "{item.rawText}"</span>
                   <span>•</span>
                   <span>Confidence: {Math.round(item.confidence * 100)}%</span>
@@ -119,7 +119,7 @@ export function PrescriptionReview({ items, onConfirm, onCancel }: PrescriptionR
       </div>
 
       {/* Safety Notice */}
-      <p className="text-[11px] text-slate-400 italic">
+      <p className="text-[11px] text-ink/60 font-mono italic">
         * Prescription image is processed strictly in memory and discarded immediately. No diagnosis or dispensing will occur.
       </p>
 
@@ -128,14 +128,14 @@ export function PrescriptionReview({ items, onConfirm, onCancel }: PrescriptionR
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="px-4 py-2 rounded-xl text-xs font-bold text-ink bg-sand hover:bg-cream border border-ink shadow-xs transition-colors cursor-pointer"
         >
           Discard
         </button>
         <button
           type="button"
           onClick={handleConfirm}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/30 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black bg-sun hover:bg-sun-deep text-ink border-2 border-ink shadow-brutal-sm transition-all cursor-pointer"
         >
           <Sparkles className="h-4 w-4" />
           <span>Confirm & Compare Selected</span>

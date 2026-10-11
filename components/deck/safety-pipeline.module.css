@@ -1,0 +1,22 @@
+.packet {
+  filter: drop-shadow(0 0 6px rgba(243, 211, 91, 0.8));
+}
+
+.packetBlocked {
+  filter: drop-shadow(0 0 8px rgba(194, 54, 45, 0.9));
+}
+
+.pulseNode {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    stroke-opacity: 0.3;
+    r: 44px;
+  }
+  50% {
+    stroke-opacity: 0.8;
+    r: 48px;
+  }
+}

@@ -13,6 +13,7 @@ import {
   Calendar,
   Sparkles,
   ShieldAlert,
+  X,
 } from "lucide-react";
 
 interface SavedMedicine {
@@ -182,20 +183,20 @@ export default function MedicinesPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-8 bg-slate-50 dark:bg-slate-950">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+    <div className="flex-1 overflow-y-auto px-4 py-6 sm:py-8 bg-background text-foreground">
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        {/* Header Section (CivicPulse Neo-Brutalist Theme) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-2 border-ink">
           <div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                <HeartPulse className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl border-2 border-ink bg-sun text-ink flex items-center justify-center shadow-[2px_2px_0_0_#17140f] shrink-0">
+                <HeartPulse className="h-5 w-5 text-ink" />
               </div>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h1 className="font-heading text-2xl sm:text-3xl font-black text-ink tracking-tight">
                 My Medicines & Refill Schedules
               </h1>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs sm:text-sm font-medium text-ink/70">
               Track prescription cycles, configure refill alerts, and screen for adverse cross-medication interactions.
             </p>
           </div>
@@ -204,7 +205,7 @@ export default function MedicinesPage() {
             <button
               onClick={handleCheckInteractions}
               disabled={medicines.length < 2 || checkingInteractions}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white shadow-sm disabled:opacity-50 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-sun hover:bg-sun-deep text-ink border-2 border-ink shadow-brutal-sm disabled:opacity-50 transition-all cursor-pointer"
             >
               <ShieldAlert className="h-4 w-4" />
               <span>{checkingInteractions ? "Analyzing..." : "Check Interactions"}</span>
@@ -212,7 +213,7 @@ export default function MedicinesPage() {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/30 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-ink hover:bg-black text-cream border-2 border-ink shadow-brutal-sm transition-all cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Add Medicine</span>
@@ -224,32 +225,32 @@ export default function MedicinesPage() {
         {hasCheckedInteractions && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-300">
             {interactions.length > 0 ? (
-              <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 space-y-3">
-                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
-                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <div className="p-5 rounded-3xl border-2 border-ink bg-sun/30 space-y-3 shadow-brutal-sm">
+                <div className="flex items-center gap-2 text-ink font-heading font-black text-base">
+                  <AlertTriangle className="h-5 w-5 text-sun-deep" />
                   <span>Cross-Medication Interaction Warning ({interactions.length} detected)</span>
                 </div>
                 <div className="space-y-3 pt-1">
                   {interactions.map((alert, i) => (
                     <div
                       key={i}
-                      className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/60 shadow-xs space-y-1.5"
+                      className="p-4 rounded-2xl border-2 border-ink bg-white shadow-brutal-sm space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                        <span className="font-bold text-xs text-destructive flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-blush border border-ink text-ink">
                             {alert.severity} SEVERITY
                           </span>
                           {alert.title}
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="font-mono text-xs font-bold text-ink/60">
                           {alert.medicinesInvolved.join(" ⇄ ")}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-700 dark:text-slate-300">
+                      <p className="text-xs text-ink/80 leading-relaxed font-medium">
                         {alert.description}
                       </p>
-                      <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg">
+                      <p className="text-xs font-medium text-ink bg-sand/60 p-2.5 rounded-xl border border-ink/20">
                         💡 <strong>Medical Guidance:</strong> {alert.recommendation}
                       </p>
                     </div>
@@ -257,8 +258,8 @@ export default function MedicinesPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              <div className="p-4 rounded-2xl border-2 border-ink bg-olive/30 flex items-center gap-3 text-ink text-xs font-bold shadow-brutal-sm">
+                <CheckCircle2 className="h-5 w-5 text-olive-deep shrink-0" />
                 <span>No adverse cross-drug contraindications detected among your active saved medications.</span>
               </div>
             )}
@@ -267,38 +268,40 @@ export default function MedicinesPage() {
 
         {/* Medicines List */}
         {loading ? (
-          <div className="text-center py-12 text-slate-400 text-xs">Loading medicines...</div>
+          <div className="text-center py-12 text-ink/60 font-mono text-xs font-bold">
+            Loading medicines...
+          </div>
         ) : medicines.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 space-y-4">
-            <div className="h-16 w-16 mx-auto rounded-2xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-              <Pill className="h-8 w-8" />
+          <div className="text-center py-14 bg-white rounded-3xl border-2 border-ink p-8 shadow-brutal space-y-4">
+            <div className="h-16 w-16 mx-auto rounded-2xl border-2 border-ink bg-sand flex items-center justify-center text-ink shadow-brutal-sm">
+              <Pill className="h-8 w-8 text-ink" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
+              <h3 className="font-heading font-black text-xl text-ink">
                 No active medicines tracked yet
               </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              <p className="text-xs sm:text-sm text-ink/70 max-w-md mx-auto">
                 Add your regular prescriptions to automatically monitor stock levels, compute refill timelines, and scan safety contraindications.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 rounded-xl bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-ink text-cream text-xs font-bold hover:bg-black border-2 border-ink shadow-brutal-sm transition-all cursor-pointer"
               >
                 Add Your First Medicine
               </button>
               <button
                 onClick={handleLoadSampleRegimen}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-full bg-cream text-ink text-xs font-bold hover:bg-sun border-2 border-ink shadow-brutal-sm transition-all cursor-pointer flex items-center gap-1.5"
               >
-                <Sparkles className="h-3.5 w-3.5 text-teal-600" />
+                <Sparkles className="h-3.5 w-3.5 text-sun-deep" />
                 Load Sample Regimen (4 Meds)
               </button>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {medicines.map((med) => {
               const daysRemaining = calculateDaysRemaining(med.lastRefill, med.refillEveryDays);
               const isUrgent = daysRemaining <= 3;
@@ -307,81 +310,81 @@ export default function MedicinesPage() {
               return (
                 <div
                   key={med._id}
-                  className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
+                  className="rounded-3xl bg-white border-2 border-ink p-5 shadow-brutal flex flex-col justify-between space-y-4 hover:-translate-y-0.5 transition-transform"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-extrabold text-base text-slate-900 dark:text-white leading-tight">
+                        <h4 className="font-heading font-black text-lg text-ink leading-tight">
                           {med.medicineName}
                         </h4>
                         {med.dosage && (
-                          <span className="text-xs font-semibold text-teal-600 dark:text-teal-400">
+                          <span className="font-mono text-xs font-bold text-ink/70">
                             {med.dosage}
                           </span>
                         )}
                       </div>
 
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold border border-ink uppercase ${
                           isUrgent
-                            ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                            ? "bg-blush text-ink"
                             : isWarning
-                            ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-                            : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                            ? "bg-sun text-ink"
+                            : "bg-olive/40 text-ink"
                         }`}
                       >
                         {isUrgent ? "Refill Urgent" : isWarning ? "Refill Soon" : "In Stock"}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
+                    <div className="text-xs text-ink/75 space-y-1.5 font-medium">
                       <p>
-                        <strong>Dosing:</strong> {med.frequency}
+                        <strong className="text-ink">Dosing:</strong> {med.frequency}
                       </p>
-                      <p className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
+                      <p className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5 text-ink/60 shrink-0" />
                         <span>Supply: {med.refillEveryDays} days cycle</span>
                       </p>
-                      <p className="flex items-center gap-1">
-                        <Bell className="h-3.5 w-3.5" />
+                      <p className="flex items-center gap-1.5">
+                        <Bell className="h-3.5 w-3.5 text-ink/60 shrink-0" />
                         <span>Alert: {med.reminderChannel === "email" ? "Email (Resend)" : "In-App"}</span>
                       </p>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="pt-3 border-t border-ink/15 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                      <span className="font-mono text-[10px] text-ink/60 uppercase font-bold tracking-wider block">
                         Days Remaining
                       </span>
                       <span
-                        className={`text-lg font-black ${
+                        className={`font-heading text-xl font-black ${
                           isUrgent
-                            ? "text-rose-600"
+                            ? "text-destructive"
                             : isWarning
-                            ? "text-amber-500"
-                            : "text-slate-900 dark:text-white"
+                            ? "text-sun-deep"
+                            : "text-ink"
                         }`}
                       >
                         {daysRemaining > 0 ? `${daysRemaining} days` : "Due today"}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleMarkRefilled(med)}
                         title="Mark as Refilled"
-                        className="p-2 rounded-xl text-slate-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950/50 transition-colors"
+                        className="h-8 w-8 rounded-full border border-ink bg-cream hover:bg-sun text-ink flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(med._id)}
                         title="Delete Medicine"
-                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
+                        className="h-8 w-8 rounded-full border border-ink bg-cream hover:bg-blush text-ink flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
@@ -391,110 +394,108 @@ export default function MedicinesPage() {
           </div>
         )}
 
-        {/* Add Medicine Modal */}
+        {/* Add Medicine Modal (CivicPulse Neo-Brutalist Popover) */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5 animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-center justify-between">
-                <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
+          <div className="fixed inset-0 z-50 bg-ink/65 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#fbf8ef] rounded-[2.5rem] max-w-md w-full p-6 sm:p-7 shadow-[10px_10px_0_0_#17140f] border-[3px] border-ink text-ink space-y-5 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between border-b-2 border-ink/15 pb-3">
+                <h3 className="font-heading font-black text-xl text-ink">
                   Add Tracked Medicine
                 </h3>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold"
+                  className="h-8 w-8 rounded-full border border-ink bg-cream hover:bg-sand flex items-center justify-center text-ink cursor-pointer"
                 >
-                  ✕
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <form onSubmit={handleAddMedicine} className="space-y-4 text-xs">
+              <form onSubmit={handleAddMedicine} className="space-y-4">
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Medicine / Brand Name
+                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-ink/70 block mb-1">
+                    Medicine Name *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Dolo 650, Telmisartan 40mg, Augmentin"
                     value={newMedName}
                     onChange={(e) => setNewMedName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                    placeholder="e.g. Augmentin 625 Duo or Dolo 650"
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-ink bg-white text-xs font-bold text-ink shadow-[2px_2px_0_0_#17140f] focus:outline-none focus:ring-1 focus:ring-ink"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                      Dosage Strength
+                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-ink/70 block mb-1">
+                      Dosage
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. 650 mg, 10 mg"
                       value={newMedDosage}
                       onChange={(e) => setNewMedDosage(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white"
+                      placeholder="e.g. 625 mg"
+                      className="w-full px-3 py-2 rounded-xl border-2 border-ink bg-white text-xs font-bold text-ink shadow-[2px_2px_0_0_#17140f] focus:outline-none"
                     />
                   </div>
+
                   <div>
-                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-ink/70 block mb-1">
                       Cycle (Days)
                     </label>
                     <input
                       type="number"
-                      min="1"
-                      max="180"
+                      min={1}
+                      max={180}
                       value={newMedDays}
                       onChange={(e) => setNewMedDays(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white"
+                      className="w-full px-3 py-2 rounded-xl border-2 border-ink bg-white font-mono text-xs font-bold text-ink shadow-[2px_2px_0_0_#17140f] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-ink/70 block mb-1">
                     Frequency
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={newMedFrequency}
                     onChange={(e) => setNewMedFrequency(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white"
-                  >
-                    <option value="Once daily after meals">Once daily after meals</option>
-                    <option value="Twice daily (morning and night)">Twice daily (morning & night)</option>
-                    <option value="Three times daily">Three times daily</option>
-                    <option value="As needed for pain/symptoms">As needed for pain / symptoms</option>
-                  </select>
+                    placeholder="e.g. Twice daily after meals"
+                    className="w-full px-3 py-2 rounded-xl border-2 border-ink bg-white text-xs font-bold text-ink shadow-[2px_2px_0_0_#17140f] focus:outline-none"
+                  />
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Refill Reminder Channel
+                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-ink/70 block mb-1">
+                    Refill Notification Alert
                   </label>
                   <select
                     value={newMedChannel}
                     onChange={(e) => setNewMedChannel(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 rounded-xl border-2 border-ink bg-white text-xs font-bold text-ink shadow-[2px_2px_0_0_#17140f] focus:outline-none"
                   >
-                    <option value="email">Email Notification (Resend)</option>
-                    <option value="in_app">In-App Notification</option>
-                    <option value="none">No Alerts</option>
+                    <option value="email">Email Notification (via Resend)</option>
+                    <option value="in_app">In-App Notification Banner</option>
+                    <option value="none">Disabled (No Reminders)</option>
                   </select>
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-2.5">
+                <div className="pt-2 flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
+                    className="flex-1 py-3 px-4 rounded-full border-2 border-ink bg-sand hover:bg-cream font-heading font-bold text-xs uppercase tracking-wider text-ink cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-md shadow-teal-600/30"
+                    disabled={isSubmitting || !newMedName.trim()}
+                    className="flex-1 py-3 px-4 rounded-full border-2 border-ink bg-ink text-cream hover:bg-black font-heading font-extrabold text-xs uppercase tracking-wider shadow-brutal-sm cursor-pointer disabled:opacity-40"
                   >
-                    {isSubmitting ? "Saving..." : "Save Medicine"}
+                    {isSubmitting ? "Saving..." : "Add to Cabinet"}
                   </button>
                 </div>
               </form>

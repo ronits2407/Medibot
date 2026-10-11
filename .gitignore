@@ -34,3 +34,13 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# LaTeX build artifacts
+docs/technical-report/*.aux
+docs/technical-report/*.log
+docs/technical-report/*.out
+docs/technical-report/*.toc
+docs/technical-report/*.bbl
+docs/technical-report/*.blg
+docs/technical-report/*.synctex.gz
+

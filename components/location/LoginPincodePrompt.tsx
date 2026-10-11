@@ -83,22 +83,22 @@ export function LoginPincodePrompt() {
   };
 
   return (
-    <div className="mt-5 p-3.5 rounded-2xl bg-teal-50/60 dark:bg-slate-800/60 border border-teal-200/80 dark:border-slate-700/80 text-xs space-y-2">
+    <div className="mt-5 p-4 rounded-2xl bg-cream border-2 border-ink text-xs space-y-2.5 text-ink shadow-brutal-sm">
       <div className="flex items-center justify-between">
-        <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-          <MapPin className="h-4 w-4 text-teal-600" />
+        <span className="font-heading font-black text-ink flex items-center gap-1.5 text-xs">
+          <MapPin className="h-4 w-4 text-ink" />
           Delivery Location Permission
         </span>
         <button
           type="button"
           onClick={handleDetect}
           disabled={detecting}
-          className="text-[11px] font-semibold text-teal-700 dark:text-teal-400 hover:underline flex items-center gap-1 cursor-pointer"
+          className="text-[11px] font-bold text-ink bg-sun hover:bg-sun-deep border border-ink rounded-xl px-2.5 py-1 shadow-xs flex items-center gap-1 cursor-pointer transition-all"
         >
           {detecting ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
+            <Loader2 className="h-3 w-3 animate-spin text-ink" />
           ) : (
-            <Navigation className="h-3 w-3" />
+            <Navigation className="h-3 w-3 text-ink" />
           )}
           <span>{detecting ? "Detecting..." : "Auto-Detect"}</span>
         </button>
@@ -113,25 +113,25 @@ export function LoginPincodePrompt() {
               value={pincode}
               onChange={(e) => handleManualSave(e.target.value)}
               placeholder="Enter 6-digit PIN"
-              className="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 font-mono"
+              className="w-full px-3 py-1.5 text-xs rounded-xl border-2 border-ink bg-white font-mono font-bold text-ink shadow-xs focus:outline-none"
             />
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-2 py-1 bg-teal-600 text-white rounded-lg text-[11px] font-semibold"
+              className="px-3 py-1.5 bg-ink text-cream rounded-xl text-xs font-bold border-2 border-ink shadow-xs cursor-pointer"
             >
               Done
             </button>
           </div>
         ) : (
           <>
-            <span className="text-slate-600 dark:text-slate-300 font-medium truncate">
-              📍 PIN: <strong>{pincode}</strong> {area && `(${area})`}
+            <span className="text-ink font-mono font-medium text-xs truncate">
+              📍 PIN: <strong className="font-bold">{pincode}</strong> {area && `(${area})`}
             </span>
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="text-[11px] font-semibold text-slate-500 hover:text-teal-600 underline cursor-pointer shrink-0"
+              className="text-[11px] font-bold text-ink/70 hover:text-ink underline cursor-pointer shrink-0"
             >
               Change
             </button>
@@ -139,7 +139,7 @@ export function LoginPincodePrompt() {
         )}
       </div>
 
-      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+      <p className="text-[10px] text-ink/60 font-mono">
         Required to compute local pharmacy delivery SLAs and instant inventory availability.
       </p>
     </div>

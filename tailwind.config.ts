@@ -21,6 +21,7 @@ const config: Config = {
         "olive-deep": "#7f9145",
         sky: "#b4c3ec",
         "sky-deep": "#8c9fdb",
+        coral: "#c2362d",
         background: "var(--background)",
         foreground: "var(--foreground)",
         card: {

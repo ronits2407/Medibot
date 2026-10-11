@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, ShieldAlert, Sparkles, Scale, RefreshCw, HeartPulse, Building, Pill, CheckCircle2 } from "lucide-react";
 import { QuerySandbox } from "@/components/landing/QuerySandbox";
 import { RubricCalculator } from "@/components/landing/RubricCalculator";
+import HeroThreads from "@/components/landing/HeroThreads";
 
 const MODULES = [
   {
@@ -110,8 +111,9 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative mx-auto max-w-6xl px-4 pb-12 pt-14 sm:pt-20">
-        <div className="mx-auto max-w-3xl text-center">
+      <section className="relative mx-auto max-w-6xl px-4 pb-12 pt-14 sm:pt-20 isolate">
+        <HeroThreads />
+        <div className="relative z-10 mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-cream px-4 py-1.5 text-xs font-extrabold shadow-brutal-sm">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-olive-deep opacity-75" />
@@ -151,7 +153,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Product Metrics Card */}
-        <div className="mt-14 rounded-[2.5rem] border-2 border-ink bg-cream p-4 shadow-brutal-lg">
+        <div className="relative z-10 mt-14 rounded-[2.5rem] border-2 border-ink bg-cream p-4 shadow-brutal-lg">
           <div className="grid gap-4 rounded-[2rem] bg-sand p-4 md:grid-cols-4">
             <div className="rounded-2xl border-2 border-ink bg-sun p-5 shadow-brutal-sm">
               <span className="text-[10px] font-black uppercase tracking-wider text-ink">Schedule H Intercept</span>

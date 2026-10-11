@@ -7,6 +7,8 @@ import { Message } from "@/lib/db/models/Message";
 import { MyMedicine } from "@/lib/db/models/MyMedicine";
 import { DisclaimerAck } from "@/lib/db/models/DisclaimerAck";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();

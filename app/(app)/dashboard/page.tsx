@@ -39,7 +39,7 @@ export default function SafetyDashboardPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 max-w-6xl mx-auto space-y-8 bg-background">
+    <div className="flex-1 overflow-y-auto scrollbar-none p-6 max-w-6xl mx-auto space-y-8 bg-background">
       {/* Dashboard Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b-2 border-ink pb-6">
         <div>

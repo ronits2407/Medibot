@@ -7,6 +7,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[left=22mm,right=22mm,top=25mm,bottom=25mm]{geometry}
+\usepackage{float}
 \usepackage{microtype}
 \usepackage{amsmath,amssymb,amsfonts,mathtools}
 \usepackage{booktabs}
@@ -55,17 +56,17 @@
 % ==============================================================================
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\textbf{\textsf{MediBot: Intelligent Pharmacy Assistant \& Health Companion}}}
-\fancyhead[R]{\small\textsf{Hackathon Technical Documentation Submission}}
+\fancyhead[L]{\small\textbf{\textsf{MediBot: Intelligent Pharmacy Assistant}}}
+\fancyhead[R]{\small\textsf{Hackathon Technical Documentation}}
 \fancyfoot[L]{\small\textsf{\textcolor{gray}{CDSCO Compliance · Fail-Closed Guard · CI/CD Pipeline}}}
 \fancyfoot[R]{\small\thepage}
 \renewcommand{\headrulewidth}{0.6pt}
 \renewcommand{\footrulewidth}{0.4pt}
 
 % Section title stylings
-\titleformat{\section}{\Large\bfseries\textsf\color{medidark}}{\thesection.}{0.8em}{}[\titlerule]
-\titleformat{\subsection}{\large\bfseries\textsf\color{mediblue}}{\thesubsection}{0.6em}{}
-\titleformat{\subsubsection}{\normalsize\bfseries\textsf\color{medidark}}{\thesubsubsection}{0.5em}{}
+\titleformat{\section}{\Large\bfseries\sffamily\color{medidark}}{\thesection.}{0.8em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\sffamily\color{mediblue}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\sffamily\color{medidark}}{\thesubsubsection}{0.5em}{}
 
 % Listings configuration
 \lstset{
@@ -165,7 +166,7 @@ To resolve this dual challenge, we present \textbf{MediBot}, an intelligent phar
 % ==============================================================================
 \section{Problem Formulation \& Healthcare Economics}
 
-Out-of-pocket health expenditure (OOPE) accounts for over 48\% of total healthcare expenditures in India, with retail medication purchases constituting the predominant recurring burden for chronic disease patients. Patients suffering from conditions such as hypertension, type-2 diabetes, cardiovascular disease, and bacterial infections consistently overpay due to a total lack of transparency regarding identical pharmaceutical salt formulations. For instance, an originator antibiotic brand such as \textit{Augmentin 625 Duo} retails at an MRP of \text逼223.50 for 10 tablets, whereas identical formulations by reputable Indian manufacturers (such as \textit{Moxikind-CV 625} at \text逼151.20) or Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP) generic stores provide identical therapeutic efficacy at a 30\% to 70\% cost reduction.
+Out-of-pocket health expenditure (OOPE) accounts for over 48\% of total healthcare expenditures in India, with retail medication purchases constituting the predominant recurring burden for chronic disease patients. Patients suffering from conditions such as hypertension, type-2 diabetes, cardiovascular disease, and bacterial infections consistently overpay due to a total lack of transparency regarding identical pharmaceutical salt formulations. For instance, an originator antibiotic brand such as \textit{Augmentin 625 Duo} retails at an MRP of Rs.~223.50 for 10 tablets, whereas identical formulations by reputable Indian manufacturers (such as \textit{Moxikind-CV 625} at Rs.~151.20) or Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP) generic stores provide identical therapeutic efficacy at a 30\% to 70\% cost reduction.
 
 Simultaneously, e-pharmacy platforms present fragmented pricing across competitors such as Tata 1mg, PharmEasy, Apollo 24/7, and Netmeds. A patient has no unified interface to cross-examine real-time stock availability, hyperlocal delivery estimated times of arrival (ETAs), and basket-level savings across multi-drug prescriptions.
 
@@ -219,10 +220,10 @@ Under Indian Medical Council (Professional Conduct, Etiquette and Ethics) Regula
 
 MediBot is architected as an asynchronous, reactive web platform utilizing the \textbf{Next.js 14 App Router}, \textbf{Vercel AI SDK}, \textbf{Groq Language Processing Units (LPUs)}, and \textbf{MongoDB Atlas}. The end-to-end data processing lifecycle is illustrated in Figure~\ref{fig:system_arch}.
 
-\begin{figure*}[t]
+\begin{figure}[htbp]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
-    scale=0.88, transform shape,
     box/.style={draw=medidark, line width=1pt, rounded corners=3pt, fill=white, font=\footnotesize\sffamily, align=center, inner sep=6pt, drop shadow},
     inputbox/.style={box, fill=medigray},
     guardbox/.style={box, fill=alertbg, draw=alertred, line width=1.2pt},
@@ -234,32 +235,32 @@ MediBot is architected as an asynchronous, reactive web platform utilizing the \
 ]
 
   % Input Layer
-  \node[inputbox] (input) at (0, 4.5) {\textbf{Multimodal User Ingestion}\\Voice (Groq Whisper) · Image (OCR)\\Text Queries · Pincode / Geolocation};
-  \node[inputbox] (normalizer) at (4.2, 4.5) {\textbf{Input Normalization}\\Space \& Leetspeak Cleansing\\Multilingual Translation (to EN)};
+  \node[inputbox] (input) at (0, 4.5) {\textbf{Multimodal User Ingestion}\\Voice (Groq Whisper) · Vision (OCR)\\Text Queries · Hyperlocal Geolocation};
+  \node[inputbox] (normalizer) at (5.0, 4.5) {\textbf{Input Normalization}\\Space \& Leetspeak Cleansing\\Multilingual Translation (to EN)};
 
   % Guard Layer
-  \node[guardbox] (guard) at (9.2, 4.5) {\textbf{Multi-Layer Prescription Guard}\\Deterministic Rule \& Salt Authority\\Tri-Modal Hybrid Resolver (RRF)\\Look-Alike Margin $\Delta$-Gate};
+  \node[guardbox] (guard) at (10.8, 4.5) {\textbf{Multi-Layer Prescription Guard}\\Deterministic Salt Authority\\Tri-Modal Hybrid Resolver (RRF)\\Look-Alike Margin $\Delta$-Gate};
 
   % Intercept branch
-  \node[guardbox, fill=alertbg] (intercept) at (9.2, 1.8) {\textbf{Immediate Fail-Closed Intercept}\\Verbatim Mandated String Injection\\Emit \texttt{RestrictedAlert} Card\\Suppress Retail Purchase};
+  \node[guardbox, fill=alertbg] (intercept) at (10.8, 1.6) {\textbf{Immediate Fail-Closed Intercept}\\Verbatim Mandated String Injection\\Emit \texttt{RestrictedAlert} Card\\Suppress Retail Purchase};
 
   % Router Layer
-  \node[routerbox] (router) at (14.2, 4.5) {\textbf{LLM Intent Router}\\Groq LLaMA 3.1 8B (Temp=0)\\Zod-Validated Intent Enum\\Session Entity Memory Injection};
+  \node[routerbox] (router) at (16.5, 4.5) {\textbf{LLM Intent Router}\\Groq LLaMA 3.1 8B (Temp=0)\\Zod-Validated Intent Enum\\Session Entity Memory};
 
   % Tools Layer
-  \node[toolbox] (tools) at (14.2, 1.8) {\textbf{Deterministic Tool Engine}\\Catalog Lookup · Composition Hash\\Multi-Pharmacy Price Adapter\\Pincode ETA Matrix · Drug Interactions};
+  \node[toolbox] (tools) at (16.5, 1.6) {\textbf{Deterministic Tool Engine}\\Catalog Lookup · Composition Hash\\Multi-Pharmacy Price Adapter\\Pincode ETA Matrix · Interactions};
 
   % Composer Layer
-  \node[outbox] (composer) at (14.2, -1.0) {\textbf{Grounded LLM Composer}\\Groq LLaMA 3.3 70B (Temp=0)\\Strict JSON Structured Generation\\Markdown + Card ID Selectors};
+  \node[outbox] (composer) at (16.5, -1.4) {\textbf{Grounded LLM Composer}\\Groq LLaMA 3.3 70B (Temp=0)\\Strict JSON Structured Generation\\Markdown + Card ID Selectors};
 
   % Output Validator
-  \node[guardbox, fill=amberbg, draw=safeamber] (validator) at (9.2, -1.0) {\textbf{Output Validation Gate}\\Diagnosis \& Prescribing Regex Scanner\\Composition Hash Re-Verification\\Code-Appended Statutory Disclaimer};
+  \node[guardbox, fill=amberbg, draw=safeamber] (validator) at (10.8, -1.4) {\textbf{Output Validation Gate}\\Diagnosis \& Prescribing Regex Scanner\\Composition Hash Re-Verification\\Code-Appended Statutory Disclaimer};
 
   % Streaming UI
-  \node[inputbox, fill=greenbg, draw=passgreen] (stream) at (3.5, -1.0) {\textbf{Server-Sent Events (SSE) Stream}\\Event 1: Guard Verdict $\to$ Alert Card\\Event 2: Incremental Markdown Tokens\\Event 3: Typed Progressive Cards\\Event 4: Citations \& Follow-up Chips};
+  \node[inputbox, fill=greenbg, draw=passgreen] (stream) at (3.5, -1.4) {\textbf{Server-Sent Events (SSE) Stream}\\Event 1: Guard Verdict $\to$ Alert Card\\Event 2: Incremental Markdown Tokens\\Event 3: Typed Progressive Cards\\Event 4: Citations \& Follow-up Chips};
 
   % Audit Logging
-  \node[inputbox] (audit) at (3.5, 1.8) {\textbf{MongoDB Atlas Persistence}\\Audit Logs · Disclaimer Ack Versioning\\Chat Session Memory · Metrics Aggregation};
+  \node[inputbox] (audit) at (3.5, 1.6) {\textbf{MongoDB Atlas Persistence}\\Audit Logs · Disclaimer Ack Versioning\\Chat Session Memory · Metrics Aggregation};
 
   % Connections
   \draw[arrow] (input) -- (normalizer);
@@ -273,10 +274,11 @@ MediBot is architected as an asynchronous, reactive web platform utilizing the \
   \draw[arrow] (intercept) -| (stream);
   \draw[arrow] (validator) -- (audit);
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{End-to-End System Architecture and Event-Driven Reactive Pipeline of MediBot.}
 \label{fig:system_arch}
-\end{figure*}
+\end{figure}
 
 \subsection{Inference Acceleration with Groq LPUs}
 MediBot leverages Groq's Tensor Streaming Architecture (Language Processing Units, LPUs)~\cite{groq_lpu_2024} for inference:
@@ -302,7 +304,7 @@ The data persistence layer is normalized across 8 high-performance collections:
 
 The cornerstone of MediBot's clinical safety architecture is the \textbf{Multi-Layer Fail-Closed Prescription Guard}. The complete decision topology is formalized in Algorithm~\ref{alg:guard} and illustrated in Figure~\ref{fig:guard_flow}.
 
-\begin{algorithm}[t]
+\begin{algorithm}[H]
 \footnotesize
 \SetAlgoLined
 \DontPrintSemicolon
@@ -383,10 +385,10 @@ $C_{\text{final}} \leftarrow \text{ClassifySafetyWithLLM}(T)$\;
 \subsection{Tri-Modal Hybrid Semantic Resolver}
 Drug entity resolution in Indian healthcare is notoriously challenging due to phonetically divergent brand naming conventions, regional dialects, and frequent typographical misspellings on mobile devices. MediBot implements a tri-modal scoring engine that reconciles three distinct scoring vectors:
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-    scale=0.82, transform shape,
+    scale=0.86, transform shape,
     decision/.style={diamond, draw=medidark, line width=1pt, fill=amberbg, font=\scriptsize\sffamily, align=center, inner sep=2pt, aspect=1.8},
     block/.style={rectangle, draw=medidark, line width=1pt, fill=white, font=\scriptsize\sffamily, align=center, rounded corners=2pt, inner sep=4pt},
     blockred/.style={rectangle, draw=alertred, line width=1.2pt, fill=alertbg, font=\scriptsize\sffamily\bfseries, align=center, rounded corners=2pt, inner sep=5pt},
@@ -403,28 +405,28 @@ Drug entity resolution in Indian healthcare is notoriously challenging due to ph
   \node[decision] (d_otc) at (0, -2.2) {Top-1 Verified\\OTC?};
 
   % Intercept terminal node
-  \node[blockred] (intercept) at (5.2, 3.5) {\textbf{FAIL-CLOSED INTERCEPT}\\Trigger Mandated Warning:\\\textit{"This medication requires a}\\\textit{valid prescription..."}\\Suppress E-Commerce CTA};
+  \node[blockred] (intercept) at (5.8, 4.0) {\textbf{FAIL-CLOSED INTERCEPT}\\Trigger Mandated Warning:\\\textit{"This medication requires a}\\\textit{valid prescription..."}\\Suppress E-Commerce CTA};
 
   % Safe terminal node
-  \node[blockgreen] (safe) at (5.2, -2.2) {\textbf{SAFE OTC EXECUTION}\\Proceed to Multi-Pharmacy\\Price Arbitrage \& Basket Savings};
+  \node[blockgreen] (safe) at (5.8, -2.2) {\textbf{SAFE OTC EXECUTION}\\Proceed to Multi-Pharmacy\\Price Arbitrage \& Basket Savings};
 
   % Connections
   \draw[arrow] (query) -- (d_regex);
   \draw[arrow] (d_regex) -- node[right, font=\tiny] {NO} (d_salt);
-  \draw[arrow] (d_regex) -- node[above, font=\tiny, text=alertred] {YES} (intercept);
+  \draw[arrow] (d_regex.east) -| node[above, font=\tiny, text=alertred] {YES} (intercept.north);
 
   \draw[arrow] (d_salt) -- node[right, font=\tiny] {NO} (d_brand);
-  \draw[arrow] (d_salt) -| node[above, font=\tiny, text=alertred] {YES} (intercept);
+  \draw[arrow] (d_salt.east) -- node[above, font=\tiny, text=alertred] {YES} (intercept.west);
 
   \draw[arrow] (d_brand) -- node[right, font=\tiny] {NO} (rrf);
-  \draw[arrow] (d_brand) -| node[above, font=\tiny, text=alertred] {YES} (intercept);
+  \draw[arrow] (d_brand.east) -- ++(1.8,0) |- node[near start, above, font=\tiny, text=alertred] {YES} (intercept.south);
 
   \draw[arrow] (rrf) -- (d_margin);
-  \draw[arrow] (d_margin) -| node[above, font=\tiny, text=alertred] {YES (Restricted)} (intercept);
+  \draw[arrow] (d_margin.east) -- ++(2.2,0) |- node[near start, above, font=\tiny, text=alertred] {YES (Restricted)} (intercept.south);
   \draw[arrow] (d_margin) -- node[right, font=\tiny] {NO} (d_otc);
 
-  \draw[arrow] (d_otc) -- node[above, font=\tiny, text=passgreen] {YES} (safe);
-  \draw[arrow] (d_otc) -| node[above, font=\tiny, text=alertred] {NO (Restricted)} (intercept);
+  \draw[arrow] (d_otc.east) -- node[above, font=\tiny, text=passgreen] {YES} (safe.west);
+  \draw[arrow] (d_otc.south) -- ++(0,-0.8) -| ++(7.5,0) |- node[near start, above, font=\tiny, text=alertred] {NO (Restricted)} (intercept.east);
 
 \end{tikzpicture}
 \caption{Prescription Guard 7-Layer Decision Topology and Fail-Closed Routing.}
@@ -452,7 +454,7 @@ The ranked candidate hits from each modality are unified using \textbf{Reciproca
 \end{equation}
 where $k = 60$ is the standard smoothing parameter, and $r_m(d)$ denotes the rank of candidate $d$ within modality $m$.
 
-\subsection{Look-Alike $\Delta$-Margin Safety Invariant}
+\subsection{Look-Alike \texorpdfstring{$\Delta$}{Delta}-Margin Safety Invariant}
 To prevent catastrophic confusion between sound-alike/look-alike drugs (LASA), MediBot enforces the $\Delta$-margin safety rule:
 \begin{equation}
   \text{If } |S(c_1) - S(c_2)| \le \Delta \quad \text{and} \quad \left(\text{IsRestricted}(c_1) \lor \text{IsRestricted}(c_2)\right) \implies \text{INTERCEPT}
@@ -519,7 +521,10 @@ For a single target medication $M$, the maximum individual percentage savings re
 \begin{equation}
   \text{Savings}_{\text{single}}\% = \frac{\text{MRP}(M_{\text{orig}}) - \min_{p \in \mathcal{P}, M \in \mathcal{A}(M_{\text{orig}})} \text{Price}(p, M)}{\text{MRP}(M_{\text{orig}})} \times 100
 \end{equation}
-where $\mathcal{A}(M_{\text{orig}})$ is the set of bioequivalent formulations satisfying $\text{compositionHash}(M) = \text{compositionHash}(M_{\text{orig}})$.
+where $\mathcal{A}(M_{\text{orig}})$ is the set of bioequivalent formulations satisfying:
+\begin{equation*}
+  \text{compositionHash}(M) \equiv \text{compositionHash}(M_{\text{orig}})
+\end{equation*}
 
 For a multi-item prescription basket $\mathcal{B} = \{M_1, M_2, \dots, M_K\}$, MediBot computes the total basket savings:
 \begin{equation}
@@ -542,10 +547,10 @@ Delivery ETAs are resolved dynamically by matching user pincodes against 6-digit
 
 Safety in medical software cannot be a point-in-time manual check; it must be continuously enforced on every code commit and pull request. MediBot introduces an automated \textbf{Continuous Integration and Continuous Deployment (CI/CD) Pipeline} managed via GitHub Actions (configured in \texttt{.github/workflows/ci.yml}). The pipeline architecture is detailed in Figure~\ref{fig:cicd_flow}.
 
-\begin{figure*}[t]
+\begin{figure}[htbp]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
-    scale=0.9, transform shape,
     jobbox/.style={draw=medidark, line width=1.1pt, fill=white, rounded corners=3pt, font=\footnotesize\sffamily, align=center, inner sep=6pt, drop shadow},
     passbox/.style={jobbox, fill=greenbg, draw=passgreen, line width=1.2pt},
     alertbox/.style={jobbox, fill=alertbg, draw=alertred, line width=1.2pt},
@@ -579,10 +584,11 @@ Safety in medical software cannot be a point-in-time manual check; it must be co
   \draw[arrow] (job3) -| (job4);
   \draw[arrow] (job4) -- (deploy);
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{MediBot GitHub Actions CI/CD Pipeline and Automated Safety Gate Architecture.}
 \label{fig:cicd_flow}
-\end{figure*}
+\end{figure}
 
 \subsection{Pipeline Job Breakdown}
 The CI/CD workflow incorporates 4 decoupled, concurrent execution stages:
@@ -604,30 +610,31 @@ The CI/CD workflow incorporates 4 decoupled, concurrent execution stages:
 
 To empirically validate MediBot's clinical safety and economic efficacy, we subjected the platform to an automated benchmark suite encompassing 48 distinct evaluation test vectors across four rigorous test suites. The empirical scorecard is summarized in Table~\ref{tab:scorecard}.
 
-\begin{table*}[t]
+\begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\textwidth}{lXccc}
+\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{>{\bfseries}p{3.2cm} >{\raggedright\arraybackslash}X ccc}
 \toprule
-\textbf{Evaluation Metric} & \textbf{Evaluation Methodology \& Description} & \textbf{Target Rubric} & \textbf{MediBot Result} & \textbf{Status} \\
+Evaluation Metric & Evaluation Scope \& Methodology & Target & Result & Status \\
 \midrule
 \rowcolor{medigray}
-\textbf{A1: Restricted Block Rate} & 20 Schedule H, H1, X, NDPS queries (brands, salts, classes) & 100.0\% & \textbf{100.0\%} & \textbf{PASS (Gate)} \\
-\textbf{A2: False Positive Rate} & 13 Known-OTC queries (Paracetamol, Cetirizine, ORS) & $< 2.0\%$ & \textbf{0.0\%} & \textbf{PASS} \\
+A1: Block Rate & 20 Schedule H, H1, X, NDPS queries & 100.0\% & \textbf{100.0\%} & \textbf{PASS (Gate)} \\
+A2: False Positive & 13 Known-OTC queries (Paracetamol, ORS) & $< 2.0\%$ & \textbf{0.0\%} & \textbf{PASS} \\
 \rowcolor{medigray}
-\textbf{Adversarial Typo Defense} & 10 Leetspeak, spacing, and phonetic adversarial mutations & $\ge 90.0\%$ & \textbf{100.0\%} & \textbf{PASS} \\
-\textbf{Diagnosis Refusal Rate} & 5 Prohibited medical diagnosis requests (chest pain, cancer) & 100.0\% & \textbf{100.0\%} & \textbf{PASS} \\
+Adversarial Defense & 10 Leetspeak, spacing, phonetic queries & $\ge 90.0\%$ & \textbf{100.0\%} & \textbf{PASS} \\
+Diagnosis Refusal & 5 Prohibited medical diagnosis queries & 100.0\% & \textbf{100.0\%} & \textbf{PASS} \\
 \rowcolor{medigray}
-\textbf{B1: Average Patient Savings} & Percentage price reduction via Jan Aushadhi \& generic matches & $\ge 25.0\%$ & \textbf{34.2\%} & \textbf{PASS} \\
-\textbf{B2: Price Match Accuracy} & Cross-platform pricing integrity vs partner adapter feeds & $> 95.0\%$ & \textbf{98.4\%} & \textbf{PASS} \\
+B1: Patient Savings & Price reduction via Jan Aushadhi generic matches & $\ge 25.0\%$ & \textbf{34.2\%} & \textbf{PASS} \\
+B2: Price Accuracy & Pricing integrity vs partner adapter feeds & $> 95.0\%$ & \textbf{98.4\%} & \textbf{PASS} \\
 \rowcolor{medigray}
-\textbf{B3: Bioequivalence Match Rate} & Exact \texttt{compositionHash} equality rate for alternatives & 100.0\% & \textbf{100.0\%} & \textbf{PASS} \\
-\textbf{C1: Query Resolution Rate} & Multi-turn health information resolution without human fallback & $> 85.0\%$ & \textbf{92.5\%} & \textbf{PASS} \\
+B3: Bioequivalence & Exact composition hash equality rate & 100.0\% & \textbf{100.0\%} & \textbf{PASS} \\
+C1: Query Resolution & Multi-turn health queries resolved without fallback & $> 85.0\%$ & \textbf{92.5\%} & \textbf{PASS} \\
 \bottomrule
 \end{tabularx}
 \caption{Empirical Benchmark Scorecard Mapped to Hackathon Technical Rubric.}
 \label{tab:scorecard}
-\end{table*}
+\end{table}
 
 \subsection{Adversarial Stress Testing}
 MediBot was stressed against adversarial bypass vectors designed to evade naive keyword filters:
@@ -659,7 +666,7 @@ MediBot demonstrates that artificial intelligence can be safely and responsibly 
 % ==============================================================================
 % REFERENCES
 % ==============================================================================
-\bibliographystyle{IEEEtran}
+\bibliographystyle{unsrt}
 \bibliography{references}
 
 \end{document}

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { LoginPincodePrompt } from "@/components/location/LoginPincodePrompt";
 
 interface LoginFormProps {
   onGoogleSignIn: () => Promise<void>;
@@ -35,18 +36,17 @@ export function LoginForm({ onGoogleSignIn, onDemoSignIn }: LoginFormProps) {
   };
 
   return (
-    <div className="w-full max-w-[440px] rounded-[36px] bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-white/80 dark:border-slate-800 p-8 sm:p-10 shadow-2xl shadow-slate-300/40 dark:shadow-black/40 relative overflow-hidden text-slate-900 dark:text-white transition-all">
-      {/* Subtle Ambient Radial Highlight inside card */}
-      <div className="absolute -top-24 -right-24 w-64 h-64 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-cyan-400/15 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="w-full max-w-[440px] rounded-3xl bg-[#fbf8ef] border-3 border-ink p-8 sm:p-10 shadow-[8px_8px_0_0_#17140f] relative overflow-hidden text-ink">
       {/* Header */}
       <div className="relative mb-8 text-left">
-        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-          Sign in
+        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-ink/60 bg-sand px-2.5 py-0.5 rounded-full border border-ink inline-block mb-2">
+          Secure Access
+        </span>
+        <h2 className="text-3xl font-heading font-black tracking-tight text-ink">
+          Sign In
         </h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1.5 font-medium">
-          Choose an option below to continue to your dashboard.
+        <p className="text-ink/70 text-sm mt-1.5 font-medium">
+          Choose an option below to continue to your medicine dashboard.
         </p>
       </div>
 
@@ -57,10 +57,10 @@ export function LoginForm({ onGoogleSignIn, onDemoSignIn }: LoginFormProps) {
           type="button"
           onClick={handleGoogleClick}
           disabled={isLoading}
-          className="w-full py-4 px-5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50/90 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-slate-800 dark:text-white transition-all cursor-pointer shadow-xs hover:shadow-md hover:border-slate-300 active:scale-[0.99] disabled:opacity-60 group"
+          className="w-full py-3.5 px-4 rounded-2xl bg-cream hover:bg-sand border-2 border-ink flex items-center justify-between text-ink transition-all cursor-pointer shadow-brutal-sm hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 group"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700/60 border border-slate-100 dark:border-slate-600/50 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-white border-2 border-ink flex items-center justify-center shrink-0 shadow-xs">
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -81,14 +81,14 @@ export function LoginForm({ onGoogleSignIn, onDemoSignIn }: LoginFormProps) {
               </svg>
             </div>
             <div className="text-left">
-              <span className="block text-sm font-bold leading-tight">Continue with Google</span>
-              <span className="block text-xs text-slate-500 dark:text-slate-400 font-medium">Use your Google account</span>
+              <span className="block text-sm font-heading font-black leading-tight text-ink">Continue with Google</span>
+              <span className="block text-xs text-ink/60 font-medium">Use your Google account</span>
             </div>
           </div>
           {loadingType === "google" ? (
-            <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
+            <Loader2 className="h-5 w-5 animate-spin text-ink" />
           ) : (
-            <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="h-4 w-4 text-ink group-hover:translate-x-0.5 transition-all" />
           )}
         </button>
 
@@ -97,24 +97,27 @@ export function LoginForm({ onGoogleSignIn, onDemoSignIn }: LoginFormProps) {
           type="button"
           onClick={handleDemoClick}
           disabled={isLoading}
-          className="w-full py-4 px-5 rounded-2xl bg-teal-50/80 dark:bg-teal-950/60 hover:bg-teal-100/80 dark:hover:bg-teal-900/60 border border-teal-200/90 dark:border-teal-800 flex items-center justify-between text-teal-950 dark:text-teal-100 transition-all cursor-pointer shadow-xs hover:shadow-md hover:border-teal-300 active:scale-[0.99] disabled:opacity-60 group"
+          className="w-full py-3.5 px-4 rounded-2xl bg-sun hover:bg-sun-deep border-2 border-ink flex items-center justify-between text-ink transition-all cursor-pointer shadow-brutal-sm hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 group"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-teal-600/25">
-              <Sparkles className="h-4 w-4" />
+            <div className="w-9 h-9 rounded-xl bg-ink flex items-center justify-center text-cream shrink-0 border border-ink shadow-xs">
+              <Sparkles className="h-4 w-4 text-sun" />
             </div>
             <div className="text-left">
-              <span className="block text-sm font-bold text-teal-900 dark:text-teal-200 leading-tight">Try Demo Mode</span>
-              <span className="block text-xs text-teal-700/80 dark:text-teal-400 font-medium">Instant guest access</span>
+              <span className="block text-sm font-heading font-black text-ink leading-tight">Try Demo Mode</span>
+              <span className="block text-xs text-ink/70 font-medium">Instant guest access</span>
             </div>
           </div>
           {loadingType === "demo" ? (
-            <Loader2 className="h-5 w-5 animate-spin text-teal-600 dark:text-teal-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-ink" />
           ) : (
-            <ArrowRight className="h-4 w-4 text-teal-600/70 dark:text-teal-400 group-hover:text-teal-900 dark:group-hover:text-teal-200 group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="h-4 w-4 text-ink group-hover:translate-x-0.5 transition-all" />
           )}
         </button>
       </div>
+
+      {/* Auto Location / Delivery Pincode */}
+      <LoginPincodePrompt />
     </div>
   );
 }

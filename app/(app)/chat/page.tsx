@@ -144,8 +144,8 @@ export default function ChatPage() {
           ))}
 
           {isLoading && (
-            <div className="flex items-center gap-2.5 text-slate-400 text-xs py-2 animate-pulse">
-              <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+            <div className="flex items-center gap-2.5 text-ink/70 font-mono text-xs py-2 animate-pulse">
+              <Loader2 className="h-4 w-4 animate-spin text-ink" />
               <span>Checking pharmacy pricing and safety databases...</span>
             </div>
           )}

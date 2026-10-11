@@ -21,6 +21,7 @@ export function ScaledIframe({ src, width = 1440 }: { src: string; width?: numbe
           src={src}
           title={src}
           loading="eager"
+          tabIndex={-1}
           style={{ width, height: box.h / scale, transform: `scale(${scale})`, transformOrigin: '0 0', border: 0 }}
         />
       )}
