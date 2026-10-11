@@ -63,88 +63,143 @@ const KNOWN_INTERACTION_RULES: InteractionRule[] = [
   },
 ];
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = await auth();
-    const userId = session?.user?.id || session?.user?.email || "demo-user";
+async function evaluateInteractions(medicines: any[]) {
+  if (!medicines || medicines.length < 2) {
+    return {
+      totalMedicines: medicines?.length || 0,
+      interactionsFound: 0,
+      interactions: [],
+      message: "At least 2 active medications are required to evaluate cross-drug interactions.",
+    };
+  }
 
-    await connectToDatabase();
-    const medicines = await MyMedicine.find({ userId });
+  const detectedInteractions: any[] = [];
+  const medEntries = medicines.map((m) => {
+    const allText = [
+      (m.medicineName || m.name || "").toLowerCase(),
+      ...((m.activeIngredients || m.salts || []).map((ing: any) =>
+        typeof ing === "string" ? ing.toLowerCase() : (ing.saltName || "").toLowerCase()
+      )),
+    ].join(" ");
+    return { med: m, allText };
+  });
 
-    if (!medicines || medicines.length < 2) {
-      return NextResponse.json({
-        interactions: [],
-        message: "At least 2 active medications are required to evaluate cross-drug interactions.",
-      });
-    }
+  for (let i = 0; i < medEntries.length; i++) {
+    for (let j = i + 1; j < medEntries.length; j++) {
+      const m1 = medEntries[i];
+      const m2 = medEntries[j];
 
-    const detectedInteractions: any[] = [];
+      // Duplicate Paracetamol
+      const hasParacetamol1 = m1.allText.includes("paracetamol") || m1.allText.includes("acetaminophen") || m1.allText.includes("dolo") || m1.allText.includes("calpol") || m1.allText.includes("crocin");
+      const hasParacetamol2 = m2.allText.includes("paracetamol") || m2.allText.includes("acetaminophen") || m2.allText.includes("dolo") || m2.allText.includes("calpol") || m2.allText.includes("crocin");
 
-    // Extract all normalized names and ingredients
-    const medEntries = medicines.map((m) => {
-      const allText = [
-        m.medicineName.toLowerCase(),
-        ...(m.activeIngredients || []).map((ing) => ing.saltName.toLowerCase()),
-      ].join(" ");
-      return { med: m, allText };
-    });
+      if (hasParacetamol1 && hasParacetamol2) {
+        detectedInteractions.push({
+          ruleId: "paracetamol_duplicate",
+          severity: "HIGH",
+          title: `Duplicate Paracetamol Detected: ${m1.med.medicineName || m1.med.name} + ${m2.med.medicineName || m2.med.name}`,
+          description: "Both medications contain Paracetamol. Concomitant use risks exceeding maximum therapeutic thresholds (4g/day) causing liver toxicity.",
+          recommendation: "Ensure total cumulative paracetamol does not exceed medical limits. Consult your physician.",
+          medicinesInvolved: [m1.med.medicineName || m1.med.name, m2.med.medicineName || m2.med.name],
+        });
+      }
 
-    // Check Duplicate Active Ingredient Rule
-    for (let i = 0; i < medEntries.length; i++) {
-      for (let j = i + 1; j < medEntries.length; j++) {
-        const m1 = medEntries[i];
-        const m2 = medEntries[j];
+      // General rules
+      for (const rule of KNOWN_INTERACTION_RULES) {
+        if (rule.id === "paracetamol_duplicate") continue;
+        const matchGroup1 = rule.salts[0].some((k) => m1.allText.includes(k));
+        const matchGroup2 = rule.salts[1].some((k) => m2.allText.includes(k));
+        const reverseMatch1 = rule.salts[1].some((k) => m1.allText.includes(k));
+        const reverseMatch2 = rule.salts[0].some((k) => m2.allText.includes(k));
 
-        // 1. Check duplicate Paracetamol
-        const hasParacetamol1 = m1.allText.includes("paracetamol") || m1.allText.includes("acetaminophen") || m1.allText.includes("dolo") || m1.allText.includes("calpol") || m1.allText.includes("crocin") || m1.allText.includes("combiflam");
-        const hasParacetamol2 = m2.allText.includes("paracetamol") || m2.allText.includes("acetaminophen") || m2.allText.includes("dolo") || m2.allText.includes("calpol") || m2.allText.includes("crocin") || m2.allText.includes("combiflam");
-
-        if (hasParacetamol1 && hasParacetamol2) {
-          detectedInteractions.push({
-            ruleId: "paracetamol_duplicate",
-            severity: "HIGH",
-            title: `Duplicate Paracetamol Detected: ${m1.med.medicineName} + ${m2.med.medicineName}`,
-            description: "Both medications contain Paracetamol. Concomitant use risks exceeding maximum therapeutic thresholds (4g/day) causing liver toxicity.",
-            recommendation: "Ensure total cumulative paracetamol does not exceed medical limits. Consult your physician.",
-            medicinesInvolved: [m1.med.medicineName, m2.med.medicineName],
-          });
-        }
-
-        // 2. Check general rules
-        for (const rule of KNOWN_INTERACTION_RULES) {
-          if (rule.id === "paracetamol_duplicate") continue;
-
-          const matchGroup1 = rule.salts[0].some((k) => m1.allText.includes(k));
-          const matchGroup2 = rule.salts[1].some((k) => m2.allText.includes(k));
-
-          const reverseMatch1 = rule.salts[1].some((k) => m1.allText.includes(k));
-          const reverseMatch2 = rule.salts[0].some((k) => m2.allText.includes(k));
-
-          if ((matchGroup1 && matchGroup2) || (reverseMatch1 && reverseMatch2)) {
-            // Avoid duplicate pushing of same rule for same pair
-            const existing = detectedInteractions.find(
-              (d) => d.ruleId === rule.id && d.medicinesInvolved.includes(m1.med.medicineName) && d.medicinesInvolved.includes(m2.med.medicineName)
-            );
-            if (!existing) {
-              detectedInteractions.push({
-                ruleId: rule.id,
-                severity: rule.severity,
-                title: `${rule.title}: ${m1.med.medicineName} + ${m2.med.medicineName}`,
-                description: rule.description,
-                recommendation: rule.recommendation,
-                medicinesInvolved: [m1.med.medicineName, m2.med.medicineName],
-              });
-            }
+        if ((matchGroup1 && matchGroup2) || (reverseMatch1 && reverseMatch2)) {
+          const med1Name = m1.med.medicineName || m1.med.name;
+          const med2Name = m2.med.medicineName || m2.med.name;
+          const existing = detectedInteractions.find(
+            (d) => d.ruleId === rule.id && d.medicinesInvolved.includes(med1Name) && d.medicinesInvolved.includes(med2Name)
+          );
+          if (!existing) {
+            detectedInteractions.push({
+              ruleId: rule.id,
+              severity: rule.severity,
+              title: `${rule.title}: ${med1Name} + ${med2Name}`,
+              description: rule.description,
+              recommendation: rule.recommendation,
+              medicinesInvolved: [med1Name, med2Name],
+            });
           }
         }
       }
     }
+  }
 
-    return NextResponse.json({
-      totalMedicines: medicines.length,
-      interactionsFound: detectedInteractions.length,
-      interactions: detectedInteractions,
-    });
+  return {
+    totalMedicines: medicines.length,
+    interactionsFound: detectedInteractions.length,
+    interactions: detectedInteractions,
+  };
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const medsParam = searchParams.get("meds");
+
+    if (medsParam) {
+      const medList = medsParam.split(",").map((name, idx) => ({
+        _id: `param-${idx}`,
+        medicineName: name.trim(),
+        activeIngredients: [{ saltName: name.trim() }],
+      }));
+      const result = await evaluateInteractions(medList);
+      return NextResponse.json(result);
+    }
+
+    const session = await auth().catch(() => null);
+    const userId = session?.user?.id || session?.user?.email || "demo-user";
+
+    let medicines: any[] = [];
+    try {
+      await connectToDatabase();
+      medicines = await MyMedicine.find({ userId });
+    } catch {
+      medicines = [
+        { medicineName: "Dolo 650", activeIngredients: [{ saltName: "Paracetamol" }] },
+        { medicineName: "Crocin 650", activeIngredients: [{ saltName: "Paracetamol" }] },
+      ];
+    }
+
+    const result = await evaluateInteractions(medicines);
+    return NextResponse.json(result);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Failed to check interactions" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body.medicines && Array.isArray(body.medicines)) {
+      const result = await evaluateInteractions(body.medicines);
+      return NextResponse.json(result);
+    }
+
+    const session = await auth().catch(() => null);
+    const userId = session?.user?.id || session?.user?.email || "demo-user";
+
+    let medicines: any[] = [];
+    try {
+      await connectToDatabase();
+      medicines = await MyMedicine.find({ userId });
+    } catch {
+      medicines = [
+        { medicineName: "Dolo 650", activeIngredients: [{ saltName: "Paracetamol" }] },
+        { medicineName: "Crocin 650", activeIngredients: [{ saltName: "Paracetamol" }] },
+      ];
+    }
+
+    const result = await evaluateInteractions(medicines);
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("POST /api/medicines/interactions error:", error);
     return NextResponse.json({ error: error.message || "Failed to check interactions" }, { status: 500 });

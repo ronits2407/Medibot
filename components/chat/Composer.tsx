@@ -29,7 +29,6 @@ const QUICK_CHIPS = [
   "Cheapest alternative for Calpol 650",
   "Can I buy Augmentin 625 Duo?",
   "Cetirizine 10mg in Jan Aushadhi",
-  "Electral ORS usage instructions",
 ];
 
 export function Composer({
@@ -57,9 +56,11 @@ export function Composer({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Focus textarea on page load
+  // Focus textarea ONLY when running standalone, never inside an iframe
   useEffect(() => {
-    textareaRef.current?.focus();
+    if (typeof window !== "undefined" && window.self === window.top) {
+      textareaRef.current?.focus();
+    }
   }, []);
 
   // Sync PIN and resolve friendly locality name
@@ -74,22 +75,15 @@ export function Composer({
       const res = await fetch(`/api/location?pincode=${targetPin}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.valid) {
-          const formatted = data.area
-            ? `${data.area}, ${data.district || data.state}`
-            : data.district
-            ? `${data.district}, ${data.state}`
-            : data.state || targetPin;
-          setLocationName(formatted);
-          setLocationDetails({
-            area: data.area,
-            district: data.district,
-            state: data.state,
-          });
-        }
+        const friendlyName = [data.district, data.state].filter(Boolean).join(", ");
+        setLocationName(friendlyName);
+        setLocationDetails({
+          district: data.district,
+          state: data.state,
+        });
       }
-    } catch (e) {
-      console.warn("Failed to resolve location name:", e);
+    } catch {
+      // Graceful fallback
     }
   };
 
@@ -98,6 +92,7 @@ export function Composer({
       alert("Geolocation is not supported by your browser.");
       return;
     }
+
     setDetectingGps(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -110,6 +105,7 @@ export function Composer({
               lng: pos.coords.longitude,
             }),
           });
+
           if (res.ok) {
             const data = await res.json();
             if (data.pincode) {
@@ -118,61 +114,61 @@ export function Composer({
               resolveLocationName(data.pincode);
               if (typeof window !== "undefined") {
                 localStorage.setItem("medibot_delivery_pincode", data.pincode);
+                window.dispatchEvent(
+                  new CustomEvent("medibot_pincode_updated", { detail: data.pincode })
+                );
               }
+              setShowPinInput(false);
             }
           }
-        } catch (e) {
-          console.error("GPS resolution failed:", e);
+        } catch (err) {
+          console.error("GPS Reverse Geocode Error:", err);
         } finally {
           setDetectingGps(false);
         }
       },
       (err) => {
         setDetectingGps(false);
-        alert(`Location permission denied or unavailable: ${err.message}`);
+        alert(`Location Error: ${err.message}`);
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const reco = new SpeechRecognition();
-        reco.continuous = false;
-        reco.interimResults = false;
-        reco.lang = "en-IN";
-
-        reco.onresult = (e: any) => {
-          const transcript = e.results[0][0].transcript;
-          setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
-          setIsRecording(false);
-        };
-
-        reco.onerror = () => setIsRecording(false);
-        reco.onend = () => setIsRecording(false);
-        recognitionRef.current = reco;
-      }
-    }
-  }, []);
-
+  // Voice speech-to-text
   const toggleRecording = () => {
-    if (!recognitionRef.current) {
-      alert("Speech recognition is not supported in this browser.");
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
       return;
     }
 
-    if (isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
-    } else {
-      setIsRecording(true);
-      recognitionRef.current.start();
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Voice input is not supported in this browser. Please use Chrome or Edge.");
+      return;
     }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsRecording(true);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    };
+    recognition.onerror = () => setIsRecording(false);
+    recognition.onend = () => setIsRecording(false);
+
+    recognition.start();
   };
 
+  // Prescription OCR upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -214,11 +210,11 @@ export function Composer({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 space-y-3">
-      {/* Quick Suggestion Chips */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-        <span className="flex items-center gap-1 text-ink font-black uppercase text-[10px] whitespace-nowrap pl-1">
-          <Sparkles className="h-3.5 w-3.5 text-sun-deep" />
+    <div className="w-full max-w-4xl mx-auto px-3 py-2 space-y-2">
+      {/* Quick Suggestion Chips (Compact single line) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none text-xs">
+        <span className="flex items-center gap-1 text-ink font-black uppercase text-[10px] whitespace-nowrap pl-0.5 text-ink/60">
+          <Sparkles className="h-3 w-3 text-sun-deep" />
           Presets:
         </span>
         {QUICK_CHIPS.map((chip, i) => (
@@ -226,7 +222,7 @@ export function Composer({
             key={i}
             onClick={() => onSend(chip)}
             disabled={isLoading}
-            className="px-3.5 py-1.5 rounded-full bg-cream hover:bg-sun text-ink font-bold whitespace-nowrap transition-all border border-ink shadow-xs disabled:opacity-50 cursor-pointer"
+            className="px-2.5 py-1 rounded-full bg-cream hover:bg-sun text-ink font-bold text-[11px] whitespace-nowrap transition-all border border-ink shadow-xs disabled:opacity-50 cursor-pointer"
           >
             {chip}
           </button>
@@ -234,36 +230,36 @@ export function Composer({
       </div>
 
       {/* Input Form Box with Neo-brutalist styling */}
-      <div className="rounded-2xl bg-cream border-2 border-ink p-2 shadow-brutal-sm transition-all">
-        <form onSubmit={handleSubmit} className="flex items-end gap-2">
+      <div className="rounded-2xl bg-cream border-2 border-ink p-1.5 sm:p-2 shadow-brutal-sm transition-all">
+        <form onSubmit={handleSubmit} className="flex items-end gap-1.5 sm:gap-2">
           {/* Location Name & Pincode Button */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowPinInput(!showPinInput)}
-              className="px-3 py-2 rounded-xl bg-sand hover:bg-sun border border-ink text-ink transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-xs group"
+              className="px-2.5 py-1.5 rounded-xl bg-sand hover:bg-sun border border-ink text-ink transition-all flex items-center gap-1 text-xs font-bold cursor-pointer shadow-xs group"
               title="Change Delivery Location & View Nearby Pharmacies"
             >
-              <MapPin className="h-3.5 w-3.5 text-teal-600 group-hover:scale-110 transition-transform shrink-0" />
-              <span className="truncate max-w-[130px] sm:max-w-[170px] text-left leading-tight font-medium">
-                {locationName || (pin ? `PIN ${pin}` : "Set Location")}
+              <MapPin className="h-3.5 w-3.5 text-ink group-hover:scale-110 transition-transform shrink-0" />
+              <span className="truncate max-w-[110px] sm:max-w-[150px] text-left leading-tight font-medium text-[11px]">
+                {locationName || (pin ? `PIN ${pin}` : "Set PIN")}
               </span>
-              <span className="hidden md:inline-block text-[10px] text-slate-400 font-mono">
+              <span className="hidden sm:inline-block text-[10px] text-ink/60 font-mono">
                 {pin}
               </span>
             </button>
 
-            {/* Location Selector Popover */}
+            {/* Location Selector Popover (CivicPulse Neo-Brutalist Theme) */}
             {showPinInput && (
-              <div className="absolute bottom-12 left-0 z-30 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-80 space-y-3 animate-in fade-in zoom-in-95 duration-150 text-left">
+              <div className="absolute bottom-11 left-0 z-30 bg-[#fbf8ef] p-4 rounded-3xl shadow-[8px_8px_0_0_#17140f] border-2 border-ink w-80 space-y-3 animate-in fade-in zoom-in-95 duration-150 text-left text-ink">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-ink/60">
                     Active Delivery Location
                   </span>
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
-                    {locationName || "Location"}
+                  <h4 className="font-heading font-black text-sm text-ink leading-tight mt-0.5">
+                    {locationName || "Set Location"}
                   </h4>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="font-mono text-[11px] text-ink/70 font-semibold mt-0.5">
                     PIN {pin} {locationDetails.state ? `• ${locationDetails.state}` : ""}
                   </p>
                 </div>
@@ -275,7 +271,7 @@ export function Composer({
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ""))}
                     placeholder="6-digit PIN"
-                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 font-mono font-bold text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
+                    className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-ink bg-white font-mono font-bold text-ink shadow-[2px_2px_0_0_#17140f] focus:outline-none focus:ring-1 focus:ring-ink"
                   />
                   <button
                     type="button"
@@ -296,7 +292,7 @@ export function Composer({
                       }).catch(() => {});
                       setShowPinInput(false);
                     }}
-                    className="px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 bg-ink hover:bg-black text-cream rounded-xl text-xs font-bold transition-all border-2 border-ink shadow-brutal-sm cursor-pointer"
                   >
                     Save
                   </button>
@@ -307,12 +303,12 @@ export function Composer({
                   type="button"
                   onClick={handleAutoDetectLocation}
                   disabled={detectingGps}
-                  className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl bg-sun hover:bg-sun-deep text-ink text-xs font-bold flex items-center justify-center gap-1.5 transition-all border-2 border-ink shadow-brutal-sm cursor-pointer"
                 >
                   {detectingGps ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-600" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-ink" />
                   ) : (
-                    <Navigation className="h-3.5 w-3.5 text-teal-600" />
+                    <Navigation className="h-3.5 w-3.5 text-ink" />
                   )}
                   <span>{detectingGps ? "Detecting GPS..." : "Auto-Detect via GPS"}</span>
                 </button>
@@ -324,9 +320,9 @@ export function Composer({
                     setShowPinInput(false);
                     setShowNearbyModal(true);
                   }}
-                  className="w-full py-2 px-3 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/50 dark:hover:bg-teal-900/50 text-teal-800 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl bg-sky hover:bg-sky-deep text-ink text-xs font-bold flex items-center justify-center gap-1.5 transition-all border-2 border-ink shadow-brutal-sm cursor-pointer"
                 >
-                  <Store className="h-3.5 w-3.5 text-teal-600" />
+                  <Store className="h-3.5 w-3.5 text-ink" />
                   <span>View Nearest Pharmacies</span>
                 </button>
               </div>
@@ -347,20 +343,19 @@ export function Composer({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading || isLoading}
-            className="p-2.5 rounded-xl text-slate-500 hover:text-teal-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-ink/70 hover:text-ink hover:bg-sand transition-colors cursor-pointer"
             title="Upload Prescription Photo / PDF"
           >
             {isUploading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+              <Loader2 className="h-4 w-4 animate-spin text-ink" />
             ) : (
               <Paperclip className="h-4 w-4" />
             )}
           </button>
 
-          {/* Textarea / Input with no block border and active on load */}
+          {/* Textarea / Input (no autofocus to avoid page scrolling) */}
           <textarea
             ref={textareaRef}
-            autoFocus
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -371,28 +366,28 @@ export function Composer({
             }}
             placeholder="Ask about a medicine, compare prices, or find generics..."
             rows={1}
-            className="flex-1 max-h-32 resize-none bg-transparent py-2 px-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none ring-0 focus-visible:ring-0"
+            className="flex-1 max-h-32 resize-none bg-transparent py-1.5 px-2 text-xs sm:text-sm text-ink placeholder:text-ink/40 border-none outline-none focus:outline-none focus:ring-0 ring-0"
           />
 
           {/* Voice Mic Button */}
           <button
             type="button"
             onClick={toggleRecording}
-            className={`p-2.5 rounded-xl transition-all ${
+            className={`p-2 rounded-xl transition-all ${
               isRecording
-                ? "bg-red-500 text-white animate-pulse"
-                : "text-slate-500 hover:text-teal-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "bg-destructive text-white animate-pulse"
+                : "text-ink/70 hover:text-ink hover:bg-sand"
             }`}
             title="Speech to Text"
           >
-            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4 text-ink" />}
           </button>
 
           {/* Send Button */}
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="p-2.5 rounded-xl bg-ink hover:bg-black text-cream border border-ink shadow-brutal-sm disabled:opacity-40 disabled:shadow-none transition-all cursor-pointer disabled:cursor-not-allowed"
+            className="p-2 rounded-xl bg-ink hover:bg-black text-cream border border-ink shadow-brutal-sm disabled:opacity-40 disabled:shadow-none transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             <Send className="h-4 w-4" />
           </button>

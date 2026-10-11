@@ -158,15 +158,15 @@ export default function ChatPage() {
       {showScrollBottom && (
         <button
           onClick={() => scrollToBottom()}
-          className="absolute bottom-24 right-8 z-20 p-2.5 rounded-full bg-teal-600 text-white shadow-lg shadow-teal-600/30 hover:bg-teal-700 transition-all hover:scale-105"
+          className="absolute bottom-20 right-8 z-20 p-2 rounded-full bg-ink text-cream border-2 border-ink shadow-brutal-sm hover:bg-black transition-all cursor-pointer"
           title="Scroll to bottom"
         >
           <ArrowDown className="h-4 w-4" />
         </button>
       )}
 
-      {/* Message Composer Footer */}
-      <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md">
+      {/* Sleek, Compact Message Composer Footer */}
+      <footer className="border-t-2 border-ink/20 bg-[#fbf8ef]/90 backdrop-blur-md shrink-0 z-10">
         <Composer
           onSend={handleSendMessage}
           isLoading={isLoading}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { MANDATORY_DISCLAIMER, DISCLAIMER_VERSION } from "@/lib/constants";
 import {
   ShieldAlert,
@@ -9,7 +10,6 @@ import {
   MapPin,
   Navigation,
   Loader2,
-  Sparkles,
   ArrowRight,
 } from "lucide-react";
 
@@ -18,6 +18,7 @@ interface DisclaimerGateProps {
 }
 
 export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<"disclaimer" | "location">("disclaimer");
   const [isChecked, setIsChecked] = useState(false);
@@ -31,6 +32,12 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
   const [gpsError, setGpsError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If inside presentation deck or preview routes, do not block view
+    if (pathname?.startsWith("/deck")) {
+      setCheckedInitial(true);
+      return;
+    }
+
     async function checkStatus() {
       try {
         const res = await fetch("/api/disclaimer");
@@ -74,7 +81,7 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
       window.removeEventListener("medibot:open-disclaimer", handleOpen);
       window.removeEventListener("medibot:disclaimer_accepted", handleAccepted);
     };
-  }, []);
+  }, [pathname]);
 
   const handleAcceptDisclaimer = async () => {
     if (!isChecked || loading) return;
@@ -86,7 +93,6 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
         body: JSON.stringify({ version: DISCLAIMER_VERSION }),
       });
       localStorage.setItem(`medibot_disclaimer_ack_${DISCLAIMER_VERSION}`, "true");
-      // Advance to step 2: Delivery location & Pincode permission
       setStep("location");
     } catch (e) {
       console.error("Failed to submit acknowledgement:", e);
@@ -176,7 +182,6 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
         body: JSON.stringify({ pincode: validPin }),
       });
 
-      // Dispatch event to notify Chat, Composer, and Layout
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("medibot_pincode_updated", { detail: validPin })
@@ -194,55 +199,57 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
     }
   };
 
-  if (!checkedInitial || !isOpen) {
+  if (!checkedInitial || !isOpen || pathname?.startsWith("/deck")) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      {/* STEP 1: Medical Disclaimer (Only if unacknowledged) */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/65 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      {/* STEP 1: Medical Disclaimer */}
       {step === "disclaimer" ? (
-        <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 space-y-5">
-          <div className="flex items-center gap-3 text-amber-600 dark:text-amber-500">
-            <div className="rounded-2xl bg-amber-100 dark:bg-amber-950/60 p-2.5">
-              <ShieldAlert className="h-6 w-6" />
+        <div className="w-full max-w-lg rounded-[2.5rem] border-[3px] border-ink bg-[#fbf8ef] p-6 sm:p-8 shadow-[10px_10px_0_0_#17140f] text-ink animate-in zoom-in-95 duration-200 space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl border-2 border-ink bg-sun flex items-center justify-center text-ink shrink-0 shadow-[3px_3px_0_0_#17140f]">
+              <ShieldAlert className="h-7 w-7 text-ink" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-2xl font-heading font-black tracking-tight text-ink leading-tight">
                 Important Medical Disclaimer
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                CDSCO Compliance Version {DISCLAIMER_VERSION}
+              <p className="font-mono text-xs font-bold uppercase tracking-wider text-ink/60 mt-0.5">
+                CDSCO Compliance · Version {DISCLAIMER_VERSION}
               </p>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 p-4 border border-slate-200 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-200 leading-relaxed space-y-2">
-            <p className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <div className="rounded-2xl border-2 border-ink bg-sand/70 p-4 sm:p-5 text-xs text-ink leading-relaxed space-y-3 shadow-inner">
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-sun-deep shrink-0" />
               Mandatory Notice:
             </p>
-            <p className="italic bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="rounded-xl border-2 border-ink bg-white p-3.5 italic text-sm text-ink leading-relaxed shadow-[2px_2px_0_0_#17140f]">
               &ldquo;{MANDATORY_DISCLAIMER}&rdquo;
-            </p>
-            <ul className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400 list-disc list-inside pt-1">
+            </div>
+            <ul className="space-y-1.5 text-xs text-ink/80 list-disc list-inside font-medium pt-1">
               <li>Deterministic price comparison across licensed Indian pharmacies.</li>
               <li>Zero diagnostic or prescribing capability.</li>
               <li>Prescription drugs (Schedule H/H1/X) mandate a licensed doctor&apos;s prescription.</li>
             </ul>
           </div>
 
-          <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="acknowledge-checkbox"
-              checked={isChecked}
-              onChange={(e) => setIsChecked(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
-            />
+          <div className="flex items-start gap-3 pt-1">
+            <div className="relative flex items-center mt-0.5">
+              <input
+                type="checkbox"
+                id="acknowledge-checkbox"
+                checked={isChecked}
+                onChange={(e) => setIsChecked(e.target.checked)}
+                className="h-5 w-5 rounded-md border-2 border-ink bg-white text-ink accent-ink cursor-pointer focus:ring-2 focus:ring-ink"
+              />
+            </div>
             <label
               htmlFor="acknowledge-checkbox"
-              className="text-xs text-slate-600 dark:text-slate-300 select-none cursor-pointer leading-normal"
+              className="text-xs sm:text-sm font-medium text-ink select-none cursor-pointer leading-snug"
             >
               I acknowledge that MediBot is strictly an educational price comparison tool, not a substitute for professional medical consultation.
             </label>
@@ -251,10 +258,10 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
           <button
             onClick={handleAcceptDisclaimer}
             disabled={!isChecked || loading}
-            className={`w-full py-3.5 px-4 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${
+            className={`w-full py-4 px-6 rounded-full border-[3px] border-ink font-heading font-extrabold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
               isChecked && !loading
-                ? "bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20 active:scale-[0.99]"
-                : "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                ? "bg-ink text-cream hover:bg-black shadow-[4px_4px_0_0_#17140f] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer"
+                : "bg-sand text-ink/40 border-ink/40 cursor-not-allowed shadow-none"
             }`}
           >
             <span>{loading ? "Recording..." : "I Understand & Continue"}</span>
@@ -262,24 +269,23 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
           </button>
         </div>
       ) : (
-        /* STEP 2: Minimal Delivery PIN Code Selection */
-        <div className="w-full max-w-sm rounded-3xl bg-white p-6 sm:p-7 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-              <MapPin className="h-5 w-5" />
+        /* STEP 2: Delivery PIN Code Selection */
+        <div className="w-full max-w-md rounded-[2.5rem] border-[3px] border-ink bg-[#fbf8ef] p-6 sm:p-8 shadow-[10px_10px_0_0_#17140f] text-ink animate-in zoom-in-95 duration-150 space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl border-2 border-ink bg-sky flex items-center justify-center text-ink shrink-0 shadow-[3px_3px_0_0_#17140f]">
+              <MapPin className="h-6 w-6 text-ink" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
+              <h3 className="text-xl font-heading font-black text-ink leading-tight">
                 Select Delivery PIN Code
               </h3>
-              <p className="text-xs text-slate-500">
-                For local pharmacy stock & delivery speeds
+              <p className="font-mono text-xs font-bold text-ink/60 mt-0.5">
+                For local pharmacy stock & live delivery ETAs
               </p>
             </div>
           </div>
 
-          {/* 6-digit input with Auto-Detect GPS button inside */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="relative flex items-center">
               <input
                 type="text"
@@ -287,44 +293,43 @@ export function DisclaimerGate({ onAcknowledged }: DisclaimerGateProps) {
                 value={pincode}
                 onChange={(e) => handleValidatePincode(e.target.value.replace(/[^0-9]/g, ""))}
                 placeholder="Enter 6-digit PIN"
-                className="w-full px-4 py-3 pr-24 rounded-2xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm tracking-widest focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                className="w-full px-5 py-3.5 pr-28 rounded-2xl border-2 border-ink bg-white text-ink font-mono text-base font-bold tracking-widest focus:outline-hidden focus:ring-2 focus:ring-sun shadow-[3px_3px_0_0_#17140f]"
               />
               <button
                 type="button"
                 onClick={handleRequestLocationPermission}
                 disabled={detectingGps}
-                className="absolute right-2 px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 dark:hover:bg-teal-900 text-teal-700 dark:text-teal-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                className="absolute right-2 px-3 py-2 rounded-xl border-2 border-ink bg-sun hover:bg-sun-deep text-ink text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-brutal-sm cursor-pointer"
                 title="Auto-detect current location"
               >
                 {detectingGps ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-600" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-ink" />
                 ) : (
-                  <Navigation className="h-3.5 w-3.5 text-teal-600" />
+                  <Navigation className="h-3.5 w-3.5 text-ink" />
                 )}
-                <span className="text-[11px]">{detectingGps ? "Detecting" : "GPS"}</span>
+                <span>{detectingGps ? "Detecting" : "GPS"}</span>
               </button>
             </div>
 
             {locationArea && (
-              <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-1">
-                <CheckCircle2 className="h-3 w-3" />
+              <p className="text-xs font-bold text-olive-deep flex items-center gap-1.5 px-1">
+                <CheckCircle2 className="h-4 w-4" />
                 <span>{locationArea}</span>
               </p>
             )}
 
             {gpsError && (
-              <p className="text-[11px] text-amber-600 dark:text-amber-400 px-1">
+              <p className="text-xs font-bold text-destructive px-1">
                 {gpsError}
               </p>
             )}
           </div>
 
-          {/* Single clean confirm button */}
           <button
             type="button"
             onClick={handleSaveLocation}
             disabled={loading || !/^[1-9][0-9]{5}$/.test(pincode)}
-            className="w-full py-3.5 px-4 rounded-xl font-bold text-xs bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-4 px-6 rounded-full border-[3px] border-ink font-heading font-extrabold text-sm uppercase tracking-wider bg-sun hover:bg-sun-deep text-ink shadow-[4px_4px_0_0_#17140f] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : "Set Delivery PIN"}
           </button>
