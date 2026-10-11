@@ -46,10 +46,10 @@
 
 MediBot includes a dedicated in-app presentation deck engineered directly into the Next.js router at `/deck#1` with keyboard navigation (`ArrowLeft` / `ArrowRight` / `Space`), dark/light high-contrast themes, and animated slide transitions.
 
-| Slide 01: Cover & Overview | Slide 02: India's Medication Crisis |
+| Slide 01: Cover & Architecture Overview | Slide 02: India's Medication Crisis |
 | :---: | :---: |
-| <img src="public/screenshots/slide-01.png" width="460" alt="Slide 1: Cover" /> | <img src="public/screenshots/slide-02.png" width="460" alt="Slide 2: Cost and Safety Crisis" /> |
-| *Product Solution: AI Pharmacy Assistant* | *Out-of-Pocket Expenditure & OTC Abuse Crisis* |
+| <img src="public/screenshots/slide-01.png" width="460" alt="Slide 1: Cover & Architecture Overview" /> | <img src="public/screenshots/slide-02.png" width="460" alt="Slide 2: Cost and Safety Crisis" /> |
+| *Product Solution: AI Pharmacy Assistant & Guardrails* | *Out-of-Pocket Expenditure & OTC Abuse Crisis* |
 
 | Slide 03: 4 Core Platform Modules | Slide 04: 5-Tier Prescription Safety Guard |
 | :---: | :---: |
@@ -66,10 +66,10 @@ MediBot includes a dedicated in-app presentation deck engineered directly into t
 | <img src="public/screenshots/slide-07.png" width="460" alt="Slide 7: Rubric Scorecard" /> | <img src="public/screenshots/slide-08.png" width="460" alt="Slide 8: Logistics & Nearby Pharmacies" /> |
 | *Flawless Pass Across Safety, Quality, and UX Criteria* | *Hyperlocal Inventory & Tier-1/2 Delivery SLAs* |
 
-| Slide 09: System Architecture & Compliance | Slide 10: Conclusion & National Impact |
+| Slide 09: System Architecture & Compliance | Slide 10: Production Deliverables & Closing |
 | :---: | :---: |
-| <img src="public/screenshots/slide-09.png" width="460" alt="Slide 9: Architecture & Compliance" /> | <img src="public/screenshots/slide-10.png" width="460" alt="Slide 10: Conclusion & Impact" /> |
-| *Cloud Run, LPU Streaming, and CDSCO Rules* | *Democratizing Affordable & Safe Healthcare in India* |
+| <img src="public/screenshots/slide-09.png" width="460" alt="Slide 9: Architecture & Compliance" /> | <img src="public/screenshots/slide-10.png" width="460" alt="Slide 10: Production Deliverables & Closing" /> |
+| *Cloud Run, LPU Streaming, and CDSCO Rules* | *Complete Production Engineering & Hackathon Submission Summary* |
 
 ---
 
