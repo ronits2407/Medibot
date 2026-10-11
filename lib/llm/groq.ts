@@ -9,6 +9,9 @@ export const GROQ_MODELS = {
   WHISPER: "whisper-large-v3-turbo",
 } as const;
 
+export const FAST_MODEL = GROQ_MODELS.ROUTER;
+export const DEEP_MODEL = GROQ_MODELS.COMPOSER;
+
 let groqInstance: Groq | null = null;
 
 export function getGroqClient(): Groq {

@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "seed": "tsx --env-file=.env.local scripts/seed-data.ts",
-    "eval": "tsx --env-file=.env.local eval/run.ts"
+    "eval": "tsx --env-file=.env.local eval/run.ts",
+    "deck:gen": "tsx scripts/generate-deck.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,14 +25,17 @@
   "type": "module",
   "dependencies": {
     "@ai-sdk/groq": "^4.0.57",
+    "@types/leaflet": "^1.9.22",
     "ai": "^7.0.130",
     "clsx": "^2.1.1",
     "framer-motion": "^14.0.0",
     "groq-sdk": "^1.6.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.52.0",
     "mongoose": "^9.11.0",
     "next": "^14.2.35",
     "next-auth": "5.0.0-beta.32",
+    "pptxgenjs": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",

@@ -112,8 +112,9 @@ export const OTC_SALTS_ALLOWLIST = new Set([
 
 export function isKnownOtcSalt(salt: string): boolean {
   const norm = normalizeSaltName(salt);
+  if (norm.length < 3) return false;
   for (const otc of Array.from(OTC_SALTS_ALLOWLIST)) {
-    if (norm === otc || norm.includes(otc) || otc.includes(norm)) {
+    if (norm === otc || (norm.length >= 4 && new RegExp(`\\b${otc}\\b`, "i").test(norm))) {
       return true;
     }
   }
@@ -139,8 +140,15 @@ export async function checkSaltRestriction(salts: string[]): Promise<SaltCheckRe
   // 1. Check in-memory fast authority
   for (const rawSalt of salts) {
     const norm = normalizeSaltName(rawSalt);
+    if (norm.length < 3) continue;
+
     for (const [knownSalt, details] of Object.entries(BUILTIN_RESTRICTED_SALTS)) {
-      if (norm.includes(knownSalt) || knownSalt.includes(norm)) {
+      // Exact match or token contains whole salt word (e.g. "morphine sulfate" containing "morphine")
+      // NEVER allow knownSalt.includes(norm) where norm is a substring of knownSalt!
+      const isExact = norm === knownSalt;
+      const isContainedWord = norm.length >= 4 && new RegExp(`\\b${knownSalt}\\b`, "i").test(norm);
+
+      if (isExact || isContainedWord) {
         return {
           restricted: true,
           schedule: details.schedule,
@@ -156,12 +164,20 @@ export async function checkSaltRestriction(salts: string[]): Promise<SaltCheckRe
     await connectToDatabase();
     for (const rawSalt of salts) {
       const norm = normalizeSaltName(rawSalt);
+      if (norm.length < 3) continue;
+
+      const orConditions: any[] = [
+        { saltNormalized: norm },
+        { synonyms: norm },
+      ];
+
+      // Only use prefix regex search if query token is at least 4 characters
+      if (norm.length >= 4) {
+        orConditions.push({ saltNormalized: { $regex: new RegExp(`^${norm}`, "i") } });
+      }
+
       const dbMatch = await RestrictedSalt.findOne({
-        $or: [
-          { saltNormalized: norm },
-          { saltNormalized: { $regex: new RegExp(`^${norm}`, "i") } },
-          { synonyms: norm },
-        ],
+        $or: orConditions,
       });
 
       if (dbMatch) {
@@ -173,8 +189,9 @@ export async function checkSaltRestriction(salts: string[]): Promise<SaltCheckRe
         };
       }
     }
-  } catch (error) {
-    console.warn("DB salt lookup skipped or failed, using deterministic in-memory result:", error);
+    // In-memory authority was already checked; proceed quietly if DB is offline
+  } catch {
+    // In-memory fallback active
   }
 
   return { restricted: false, source: "none" };

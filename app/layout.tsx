@@ -1,9 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Instrument_Sans, Bricolage_Grotesque, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { DisclaimerGate } from "@/components/disclaimer/DisclaimerGate";
 
-const inter = Inter({ subsets: ["latin"] });
+const instrument = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "MediBot — Intelligent Pharmacy Assistant & Health Companion",
@@ -17,8 +34,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
-      <body className={`${inter.className} h-full antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100`}>
+    <html lang="en">
+      <body
+        className={`${instrument.variable} ${bricolage.variable} ${spaceMono.variable} font-sans bg-background text-foreground antialiased selection:bg-blush selection:text-ink min-h-screen`}
+      >
         <DisclaimerGate />
         {children}
       </body>

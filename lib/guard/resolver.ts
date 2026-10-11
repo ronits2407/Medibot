@@ -1,9 +1,11 @@
+import { MEDICINE_CATALOG, CatalogMedicine } from "@/lib/data/catalog";
 import { connectToDatabase } from "@/lib/db/client";
-import { Medicine, IMedicine } from "@/lib/db/models/Medicine";
+import { Medicine } from "@/lib/db/models/Medicine";
 
 export interface ResolvedCandidate {
   medicineId?: string;
   name: string;
+  brandName?: string;
   salts: string[];
   schedule: "H" | "H1" | "X" | "NDPS" | "OTC" | "UNKNOWN";
   score: number;
@@ -88,11 +90,11 @@ export function soundex(s: string): string {
 export function cleanSpacedAndLeet(text: string): string {
   let cleaned = text.trim();
 
-  // Handle single spaces between letters: "a l p r a z o l a m" -> "alprazolam"
-  cleaned = cleaned.replace(/\b([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])\b/g, "$1$2$3$4");
-  if (/\b([a-zA-Z]\s){2,}[a-zA-Z]\b/.test(cleaned)) {
-    cleaned = cleaned.replace(/(?<=\b[a-zA-Z])\s+(?=[a-zA-Z]\b)/g, "");
-  }
+  // Compress single-letter spaces: "a l p r a z o l a m" -> "alprazolam", "t r a m a d o l" -> "tramadol"
+  cleaned = cleaned.replace(/(\b[a-zA-Z]\b(\s+|$)){3,}/gi, (match) => match.replace(/\s+/g, "") + " ");
+
+  // Handle letter touching numbers like "Alprax0.5" -> "Alprax 0.5"
+  cleaned = cleaned.replace(/([a-zA-Z]+)(\d+(\.\d+)?)/g, "$1 $2");
 
   // Replace leetspeak numbers ONLY when touching letters (not inside pure numbers or dosages)
   // e.g. "0gmantin" -> "ogmantin", "alpr4z" -> "alpraz", but "650" stays "650"
@@ -106,46 +108,69 @@ export function cleanSpacedAndLeet(text: string): string {
     .replace(/@/g, "a")
     .replace(/\$/g, "s");
 
-  return cleaned;
+  return cleaned.trim();
 }
 
-let cachedCatalogMeds: Array<{
+interface InternalMedRecord {
   _id: string;
   name: string;
+  brandName: string;
   nameNormalized: string;
   salts: string[];
   schedule: "H" | "H1" | "X" | "NDPS" | "OTC" | "UNKNOWN";
-}> | null = null;
+}
 
-async function getCatalogMeds() {
+let cachedCatalogMeds: InternalMedRecord[] | null = null;
+
+async function getCatalogMeds(): Promise<InternalMedRecord[]> {
   if (!cachedCatalogMeds) {
+    // 1. Initialize with pre-verified in-memory catalog
+    const baseMeds: InternalMedRecord[] = MEDICINE_CATALOG.map((m) => ({
+      _id: m.id,
+      name: m.name,
+      brandName: m.brandName,
+      nameNormalized: m.nameNormalized,
+      salts: m.salts,
+      schedule: m.schedule,
+    }));
+
+    // 2. Supplement from MongoDB if reachable
     try {
       await connectToDatabase();
-      const meds = await Medicine.find({}).lean();
-      cachedCatalogMeds = meds.map((m: any) => ({
-        _id: m._id.toString(),
-        name: m.name,
-        nameNormalized: m.nameNormalized || m.name.toLowerCase().trim(),
-        salts: m.composition?.map((c: any) => c.saltNormalized) || [],
-        schedule: m.schedule || "UNKNOWN",
-      }));
-    } catch (e) {
-      console.warn("Could not load catalog meds for caching:", e);
-      return [];
+      const dbMeds = await Medicine.find({}).lean();
+      if (dbMeds && dbMeds.length > 0) {
+        for (const dm of dbMeds) {
+          const idStr = (dm as any)._id.toString();
+          if (!baseMeds.some((b) => b._id === idStr)) {
+            baseMeds.push({
+              _id: idStr,
+              name: dm.name,
+              brandName: dm.name.split(" ")[0],
+              nameNormalized: dm.nameNormalized || dm.name.toLowerCase().trim(),
+              salts: dm.composition?.map((c: any) => c.saltNormalized) || [],
+              schedule: dm.schedule || "UNKNOWN",
+            });
+          }
+        }
+      }
+    } catch {
+      // Graceful fallback to rich built-in catalog
     }
+
+    cachedCatalogMeds = baseMeds;
   }
   return cachedCatalogMeds;
 }
 
 /**
- * Hybrid Resolver: Combines Exact, Fuzzy, and Phonetic matches
+ * Hybrid Resolver: Combines Exact, Brand-Prefix, Fuzzy, and Phonetic matches
  */
 export async function resolveMedicineCandidates(
   mention: string,
   topK = 5
 ): Promise<ResolvedCandidate[]> {
   const cleaned = cleanSpacedAndLeet(mention).toLowerCase().trim();
-  if (!cleaned) return [];
+  if (!cleaned || cleaned.length < 3) return [];
 
   const mentionSound = soundex(cleaned);
   const candidates: ResolvedCandidate[] = [];
@@ -153,18 +178,40 @@ export async function resolveMedicineCandidates(
 
   for (const med of allMeds) {
     const medName = med.name.toLowerCase();
+    const brandLower = med.brandName.toLowerCase();
     const normName = med.nameNormalized;
 
     // 1. Exact match on brand name or salts
-    const saltMatch = med.salts.some((s) => s === cleaned || s.includes(cleaned) || cleaned.includes(s));
-    if (saltMatch || medName === cleaned || normName === cleaned || medName.startsWith(cleaned) || cleaned.startsWith(normName)) {
+    const saltMatch = med.salts.some((s) => {
+      const sLower = s.toLowerCase();
+      return (
+        sLower === cleaned ||
+        (cleaned.length >= 4 && sLower.includes(cleaned)) ||
+        (sLower.length >= 4 && cleaned.includes(sLower))
+      );
+    });
+
+    const brandExact =
+      medName === cleaned ||
+      normName === cleaned ||
+      brandLower === cleaned;
+
+    const brandPrefix =
+      cleaned.length >= 4 &&
+      (medName.startsWith(cleaned) ||
+        normName.startsWith(cleaned) ||
+        brandLower.startsWith(cleaned) ||
+        cleaned.startsWith(brandLower));
+
+    if (saltMatch || brandExact || brandPrefix) {
       candidates.push({
         medicineId: med._id,
         name: med.name,
+        brandName: med.brandName,
         salts: med.salts,
         schedule: med.schedule,
         score: 1.0,
-        via: saltMatch ? "exact" : "exact",
+        via: "exact",
       });
       continue;
     }
@@ -172,18 +219,26 @@ export async function resolveMedicineCandidates(
     // 2. Fuzzy match
     const fScore = Math.max(
       fuzzySimilarity(cleaned, medName),
-      fuzzySimilarity(cleaned, normName)
+      fuzzySimilarity(cleaned, normName),
+      fuzzySimilarity(cleaned, brandLower),
+      ...med.salts.map((s) => fuzzySimilarity(cleaned, s))
     );
 
     // 3. Phonetic match
-    const pScore = soundex(medName) === mentionSound || soundex(normName) === mentionSound ? 0.85 : 0.0;
+    const pScore =
+      soundex(medName) === mentionSound ||
+      soundex(normName) === mentionSound ||
+      soundex(brandLower) === mentionSound
+        ? 0.85
+        : 0.0;
 
     const combinedScore = Math.max(fScore, pScore);
 
-    if (combinedScore >= 0.55) {
+    if (combinedScore >= 0.6) {
       candidates.push({
         medicineId: med._id,
         name: med.name,
+        brandName: med.brandName,
         salts: med.salts,
         schedule: med.schedule,
         score: combinedScore,

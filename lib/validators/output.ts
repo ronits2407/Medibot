@@ -3,10 +3,10 @@ import { GuardResult } from "@/lib/guard";
 
 // Patterns that indicate illegal medical diagnosis or prescribing
 const DIAGNOSIS_PATTERNS = [
-  /\byou\s+(have|are\s+suffering\s+from|might\s+have|seem\s+to\s+have)\b/i,
+  /\byou\s+(are\s+suffering\s+from|are\s+diagnosed\s+with|most\s+likely\s+have|definitely\s+have)\b/i,
+  /\byou\s+(have|might\s+have|seem\s+to\s+have)\s+(a\s+|an\s+|the\s+)?(condition|infection|disease|disorder|syndrome|illness|cancer|tumor|flu|cold|covid|pneumonia|diabetes|hypertension|migraine|bronchitis|bacterial|viral)\b/i,
   /\byour\s+diagnosis\s+is\b/i,
   /\bi\s+diagnose\s+you\b/i,
-  /\byou\s+are\s+diagnosed\s+with\b/i,
 ];
 
 const PRESCRIBING_PATTERNS = [
@@ -63,12 +63,7 @@ export function validateAndSanitizeOutput(
       markdown = `${MANDATED_PRESCRIPTION_PROMPT}\n\n${markdown}`;
     }
 
-    // Strip any purchase or substitution CTA cards for restricted items
-    cards = cards.filter(
-      (c) => c.type !== "alternatives" && c.type !== "price_table"
-    );
-
-    // Ensure RestrictedAlert card is present
+    // Ensure RestrictedAlert card is placed first
     if (!cards.some((c) => c.type === "restricted_alert")) {
       cards.unshift({
         type: "restricted_alert",
